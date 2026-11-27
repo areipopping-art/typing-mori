@@ -1,15 +1,23 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Character, { type Mood } from "@/components/Character";
 import { initGame, typeChar } from "@/lib/game";
 import { keyToChar } from "@/lib/keys";
 import { saveLast } from "@/lib/storage";
 import { pickWords } from "@/lib/words";
 
+const PRAISE = ["いいね！", "すごい！", "じょうず！", "その ちょうし！"];
+
 export default function Game() {
   const router = useRouter();
   const [game, setGame] = useState(() => initGame(pickWords()));
+  const gameRef = useRef(game);
+  const [reaction, setReaction] = useState<{ mood: Mood; message: string }>({
+    mood: "normal",
+    message: "がんばって！",
+  });
   const [now, setNow] = useState(0);
 
   // タイマー：はじまってから終わるまで 0.1 秒ごとに表示を更新
@@ -38,8 +46,20 @@ export default function Game() {
       if (e.code === "Space") e.preventDefault(); // 画面がスクロールしないように
       const ch = keyToChar(e);
       if (!ch) return;
-      const now = performance.now();
-      setGame((g) => typeChar(g, ch, now)[0]);
+      const before = gameRef.current;
+      const [next, result] = typeChar(before, ch, performance.now());
+      gameRef.current = next;
+      setGame(next);
+      if (result === "wrong") {
+        const expected = before.words[before.index].romaji[before.pos];
+        setReaction({ mood: "surprised", message: `おしい！「${expected}」だよ` });
+      } else if (result === "word-done") {
+        setReaction({ mood: "happy", message: PRAISE[Math.floor(Math.random() * PRAISE.length)] });
+      } else if (result === "finished") {
+        setReaction({ mood: "happy", message: "やったね！" });
+      } else if (result === "correct") {
+        setReaction((r) => (r.mood === "surprised" ? { mood: "normal", message: "そう そう！" } : r));
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -57,6 +77,7 @@ export default function Game() {
         <span>⏱ {elapsed.toFixed(1)} びょう</span>
         <span>のこり {left} こ</span>
       </div>
+      <Character mood={reaction.mood} message={reaction.message} />
       <div className="w-full max-w-2xl rounded-3xl border-2 border-[var(--card-border)] bg-[var(--card)] px-6 py-10 text-center">
         <p className="text-[56px] font-extrabold leading-tight">{word.kana}</p>
         <p className="mt-4 font-mono text-[48px] font-bold tracking-wider" aria-label={`お手本 ${word.romaji}`}>
