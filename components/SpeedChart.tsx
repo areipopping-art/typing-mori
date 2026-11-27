@@ -25,17 +25,46 @@ function niceMax(v: number): number {
   return step * 4;
 }
 
+/** 見出しなどの言葉（保護者向けと 子ども向けで かえる） */
+const TEXT = {
+  parent: {
+    empty: "まだ記録がありません。",
+    title: (name: string) => `${name} の速さ（文字/分）`,
+    recent: (n: number) => `直近 ${n} 回`,
+    aria: (name: string, v: number) => `${name}の速さの推移。最新は 1分あたり ${v} 文字`,
+    speed: "速さ",
+    unit: "文字/分",
+    acc: "正確さ",
+    showTable: "表で見る",
+    hideTable: "表を閉じる",
+    when: "日時",
+  },
+  kid: {
+    empty: "まだ きろくが ないよ。あそんでみよう！",
+    title: (name: string) => `${name} の はやさ（1ぷんで なんもじ）`,
+    recent: (n: number) => `さいきんの ${n}かい`,
+    aria: (name: string, v: number) => `${name}の はやさの グラフ。さいごは 1ぷんで ${v}もじ`,
+    speed: "はやさ",
+    unit: "もじ/ぷん",
+    acc: "せいかくさ",
+    showTable: "ひょうで みる",
+    hideTable: "ひょうを とじる",
+    when: "ひにち",
+  },
+};
+
 /**
- * F-26 はやさのグラフ（保護者向け）
+ * F-26 はやさのグラフ（保護者向け。kid を つけると 子ども向けの 言葉に なる：F-32）
  * ステージを1つ選んで、そのステージの はやさ（文字/分）の推移を 1本の折れ線で表示する（直近 30 回）
  */
-export default function SpeedChart({ history }: { history: HistoryItem[] }) {
+export default function SpeedChart({ history, kid = false }: { history: HistoryItem[]; kid?: boolean }) {
+  const t = kid ? TEXT.kid : TEXT.parent;
   const stagesWithData = STAGES.filter((s) => history.some((h) => h.stage === s.id));
   const [picked, setPicked] = useState<StageId | null>(null);
   const [hover, setHover] = useState<number | null>(null);
   const [showTable, setShowTable] = useState(false);
 
-  if (stagesWithData.length === 0) return <p className="text-[var(--muted)]">まだ記録がありません。</p>;
+  if (stagesWithData.length === 0) return <p className="text-[var(--muted)]">{t.empty}</p>;
 
   // 選ばれていなければ、いちばん多く遊んだステージ
   const stage =
@@ -92,8 +121,8 @@ export default function SpeedChart({ history }: { history: HistoryItem[] }) {
       </div>
 
       <p className="mb-1 text-sm font-bold">
-        {stageOf(stage).name} の速さ（文字/分）
-        <span className="ml-2 font-normal text-[var(--muted)]">直近 {points.length} 回</span>
+        {t.title(stageOf(stage).name)}
+        <span className="ml-2 font-normal text-[var(--muted)]">{t.recent(points.length)}</span>
       </p>
 
       <div className="relative">
@@ -101,7 +130,7 @@ export default function SpeedChart({ history }: { history: HistoryItem[] }) {
           viewBox={`0 0 ${W} ${H}`}
           className="h-auto w-full"
           role="img"
-          aria-label={`${stageOf(stage).name}の速さの推移。最新は 1分あたり ${points[points.length - 1].speed} 文字`}
+          aria-label={t.aria(stageOf(stage).name, points[points.length - 1].speed)}
           onMouseLeave={() => setHover(null)}
         >
           {/* 目盛り線（細く・控えめに） */}
@@ -181,25 +210,27 @@ export default function SpeedChart({ history }: { history: HistoryItem[] }) {
                 className="mr-1 inline-block h-2 w-2 rounded-full align-middle"
                 style={{ background: "var(--viz-series)" }}
               />
-              速さ <b className="text-sm">{hp.speed}</b> 文字/分
+              {t.speed} <b className="text-sm">{hp.speed}</b> {t.unit}
             </p>
             <p>
-              正確さ {hp.acc}%　<span className="text-[var(--sun)]">{"★".repeat(hp.stars)}</span>
+              {t.acc} {hp.acc}%　<span className="text-[var(--sun)]">{"★".repeat(hp.stars)}</span>
             </p>
           </div>
         )}
       </div>
 
       <button type="button" onClick={() => setShowTable((v) => !v)} className="mt-2 text-sm underline">
-        {showTable ? "表を閉じる" : "表で見る"}
+        {showTable ? t.hideTable : t.showTable}
       </button>
       {showTable && (
         <table className="mt-2 w-full text-left text-sm">
           <thead className="text-[var(--muted)]">
             <tr>
-              <th className="py-1 pr-3 font-normal">日時</th>
-              <th className="py-1 pr-3 text-right font-normal">速さ（文字/分）</th>
-              <th className="py-1 text-right font-normal">正確さ</th>
+              <th className="py-1 pr-3 font-normal">{t.when}</th>
+              <th className="py-1 pr-3 text-right font-normal">
+                {t.speed}（{t.unit}）
+              </th>
+              <th className="py-1 text-right font-normal">{t.acc}</th>
             </tr>
           </thead>
           <tbody>

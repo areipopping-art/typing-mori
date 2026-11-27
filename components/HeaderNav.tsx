@@ -32,6 +32,11 @@ export default function HeaderNav() {
       <Link href="/stickers" className={link}>
         📖 ずかん
       </Link>
+      {data.mode === "b" && (
+        <Link href="/records" className={link}>
+          📈 きろく
+        </Link>
+      )}
     </nav>
   );
 }
