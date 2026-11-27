@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import SpeedChart from "@/components/SpeedChart";
 import { stageOf } from "@/lib/stages";
 import { STICKERS } from "@/lib/stickers";
 import { clearData, saveData, useData } from "@/lib/storage";
@@ -43,6 +44,11 @@ export default function ParentsPage() {
           練習の記録と設定です。データはこの端末のブラウザの中だけに保存され、外部には送信されません。
         </p>
       </div>
+
+      <section className={card}>
+        <h2 className="mb-3 text-xl font-bold">速さのグラフ</h2>
+        <SpeedChart history={data.history} />
+      </section>
 
       <section className={card}>
         <h2 className="mb-3 text-xl font-bold">練習の記録</h2>
