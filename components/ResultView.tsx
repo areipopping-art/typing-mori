@@ -41,8 +41,9 @@ export default function ResultView() {
   const speed = speedPerMinute(result);
   const acc = accuracy(result);
   const mode = result.mode ?? "b";
-  const star = result.stars ?? stars(speed, acc, mode);
-  const rule = STAR_RULES[mode];
+  const course = result.course ?? "kids";
+  const star = result.stars ?? stars(speed, acc, mode, course);
+  const rule = STAR_RULES[course][mode];
   const misses = sortMissChars(result.missChars);
 
   return (
@@ -56,11 +57,11 @@ export default function ResultView() {
       )}
       <Character mood="happy" message={STAR_MESSAGE[star]} />
       <p className="-mt-4 text-sm font-bold text-[var(--muted)]">
-        {stageOf(result.stage).emoji} {stageOf(result.stage).name}
+        {stageOf(result.stage, course).emoji} {stageOf(result.stage, course).name}
       </p>
       {result.unlocked && (
         <p className="rounded-full bg-[var(--sun)] px-6 py-2 text-xl font-extrabold text-[#3b2a00]">
-          🔓 {stageOf(result.unlocked).name} が ひらいたよ！
+          🔓 {stageOf(result.unlocked, course).name} が ひらいたよ！
         </p>
       )}
 

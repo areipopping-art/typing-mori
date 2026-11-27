@@ -20,6 +20,7 @@ export type LastResult = {
   unlocked: StageId | null;          // この回で ひらいたステージ
   newStickers: string[];             // この回で もらった シール
   mode: Mode;                        // あそんだ ときの モード
+  course?: Course;                   // あそんだ ときの コース
   stars: 1 | 2 | 3;                  // その モードの 基準で ついた ★
 };
 

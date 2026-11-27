@@ -52,7 +52,7 @@ export default function ParentsPage() {
         <p className="mb-2 text-sm text-[var(--muted)]">
           {courseOf(data.viewCourse).emoji} {courseOf(data.viewCourse).name}コースの記録です（コースごとに難しさが違うため分けて表示します）。
         </p>
-        <SpeedChart history={historyOf(data)} />
+        <SpeedChart history={historyOf(data)} course={data.viewCourse} />
       </section>
 
       <section className={card}>
@@ -84,7 +84,7 @@ export default function ParentsPage() {
                 {data.history.map((h) => (
                   <tr key={h.at} className="border-t border-[var(--card-border)]">
                     <td className="py-2 pr-3 whitespace-nowrap">{dateFormat.format(new Date(h.at))}</td>
-                    <td className="py-2 pr-3">{stageOf(h.stage).name}</td>
+                    <td className="py-2 pr-3">{stageOf(h.stage, h.course ?? "kids").name}</td>
                     <td className="py-2 pr-3 whitespace-nowrap">{courseOf(h.course ?? "kids").name.replace(/（.*）/, "")}</td>
                     <td className="py-2 pr-3 whitespace-nowrap">{h.mode ? modeOf(h.mode).short : "—"}</td>
                     <td className="py-2 pr-3 text-right font-bold">{h.speed}</td>

@@ -10,7 +10,7 @@ import ModeChooser from "@/components/ModeChooser";
 import { CHARACTERS, characterOf } from "@/lib/characters";
 import { courseOf } from "@/lib/courses";
 import { modeOf } from "@/lib/modes";
-import { STAGES } from "@/lib/stages";
+import { stagesFor } from "@/lib/stages";
 import { saveData, useData } from "@/lib/storage";
 
 // スタンプカードは「きょう」の日付を使うので、サーバーでは描画せずブラウザだけで作る
@@ -19,7 +19,7 @@ const StampCard = dynamic(() => import("@/components/StampCard"), { ssr: false }
 export default function Home() {
   const router = useRouter();
   const data = useData();
-  const records = STAGES.filter((s) => data.best[s.id] !== undefined);
+  const records = stagesFor(data.viewCourse).filter((s) => data.best[s.id] !== undefined);
 
   // Space キーでも あそべる
   useEffect(() => {

@@ -2,13 +2,13 @@
 
 import Character from "@/components/Character";
 import SpeedChart from "@/components/SpeedChart";
-import { STAGES, isShown } from "@/lib/stages";
+import { isShown, stagesFor } from "@/lib/stages";
 import { historyOf, useData } from "@/lib/storage";
 
 /** F-32 きろく（チャレンジ モードの 子ども向け。ひらがなの グラフ） */
 export default function RecordsPage() {
   const data = useData();
-  const stages = STAGES.filter((s) => isShown(s.id, data));
+  const stages = stagesFor(data.viewCourse).filter((s) => isShown(s.id, data));
   const card = "rounded-3xl border-2 border-[var(--card-border)] bg-[var(--card)] p-6";
 
   return (
@@ -49,7 +49,7 @@ export default function RecordsPage() {
 
       <section className={card}>
         <h2 className="mb-3 text-xl font-bold">📈 はやさの グラフ</h2>
-        <SpeedChart history={historyOf(data)} kid />
+        <SpeedChart history={historyOf(data)} course={data.viewCourse} kid />
       </section>
     </div>
   );

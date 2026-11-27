@@ -1,3 +1,4 @@
+import type { Course } from "./courses";
 import type { Mode } from "./modes";
 import type { LastResult } from "./storage";
 
@@ -13,18 +14,20 @@ export function accuracy(r: Pick<LastResult, "correct" | "miss">): number {
   return total === 0 ? 0 : Math.round((r.correct / total) * 100);
 }
 
+export type StarRule = { acc3: number; speed3: number; acc2: number };
+
 /**
- * ★の基準（モードごと。要件定義書 F-09・F-30）
- * - はじめて（A）：★3＝せいかくさ 90% 以上 かつ 30 もじ/分 以上、★2＝75% 以上
- * - チャレンジ（B）：★3＝せいかくさ 95% 以上 かつ 60 もじ/分 以上、★2＝85% 以上
+ * ★の基準（コース × モード。要件定義書 F-09・F-30・F-35）
+ * はじめて（A）は ★3 の はやさを ひくく、正確さも ゆるめにする
  */
-export const STAR_RULES: Record<Mode, { acc3: number; speed3: number; acc2: number }> = {
-  a: { acc3: 90, speed3: 30, acc2: 75 },
-  b: { acc3: 95, speed3: 60, acc2: 85 },
+export const STAR_RULES: Record<Course, Record<Mode, StarRule>> = {
+  kids: { a: { acc3: 90, speed3: 30, acc2: 75 }, b: { acc3: 95, speed3: 60, acc2: 85 } },
+  student: { a: { acc3: 90, speed3: 60, acc2: 75 }, b: { acc3: 95, speed3: 120, acc2: 85 } },
+  adult: { a: { acc3: 90, speed3: 80, acc2: 75 }, b: { acc3: 95, speed3: 150, acc2: 85 } },
 };
 
-export function stars(speed: number, acc: number, mode: Mode = "b"): 1 | 2 | 3 {
-  const r = STAR_RULES[mode];
+export function stars(speed: number, acc: number, mode: Mode = "b", course: Course = "kids"): 1 | 2 | 3 {
+  const r = STAR_RULES[course][mode];
   if (acc >= r.acc3 && speed >= r.speed3) return 3;
   if (acc >= r.acc2) return 2;
   return 1;

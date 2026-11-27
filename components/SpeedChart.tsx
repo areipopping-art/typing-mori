@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { STAGES, stageOf } from "@/lib/stages";
+import type { Course } from "@/lib/courses";
+import { stageOf, stagesFor } from "@/lib/stages";
 import type { HistoryItem } from "@/lib/storage";
 import type { StageId } from "@/lib/words";
 
@@ -57,9 +58,17 @@ const TEXT = {
  * F-26 はやさのグラフ（保護者向け。kid を つけると 子ども向けの 言葉に なる：F-32）
  * ステージを1つ選んで、そのステージの はやさ（文字/分）の推移を 1本の折れ線で表示する（直近 30 回）
  */
-export default function SpeedChart({ history, kid = false }: { history: HistoryItem[]; kid?: boolean }) {
+export default function SpeedChart({
+  history,
+  kid = false,
+  course = "kids",
+}: {
+  history: HistoryItem[];
+  kid?: boolean;
+  course?: Course;
+}) {
   const t = kid ? TEXT.kid : TEXT.parent;
-  const stagesWithData = STAGES.filter((s) => history.some((h) => h.stage === s.id));
+  const stagesWithData = stagesFor(course).filter((s) => history.some((h) => h.stage === s.id));
   const [picked, setPicked] = useState<StageId | null>(null);
   const [hover, setHover] = useState<number | null>(null);
   const [showTable, setShowTable] = useState(false);
@@ -121,7 +130,7 @@ export default function SpeedChart({ history, kid = false }: { history: HistoryI
       </div>
 
       <p className="mb-1 text-sm font-bold">
-        {t.title(stageOf(stage).name)}
+        {t.title(stageOf(stage, course).name)}
         <span className="ml-2 font-normal text-[var(--muted)]">{t.recent(points.length)}</span>
       </p>
 
@@ -130,7 +139,7 @@ export default function SpeedChart({ history, kid = false }: { history: HistoryI
           viewBox={`0 0 ${W} ${H}`}
           className="h-auto w-full"
           role="img"
-          aria-label={t.aria(stageOf(stage).name, points[points.length - 1].speed)}
+          aria-label={t.aria(stageOf(stage, course).name, points[points.length - 1].speed)}
           onMouseLeave={() => setHover(null)}
         >
           {/* 目盛り線（細く・控えめに） */}

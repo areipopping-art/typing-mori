@@ -1,47 +1,17 @@
+import type { Course } from "./courses";
 import { toUnits, type Unit } from "./romaji";
+import { WORD_LISTS, type Entry } from "./wordlists";
 
-/** 出題する ことば。kana は画面に大きく出す文字（えいたんごでは英単語）、hint は絵文字 */
-export type Word = { kana: string; units: Unit[]; hint?: string };
+/**
+ * 出題する ことば
+ * - kana：打つ 読み（ひらがな。えいたんごでは英単語）
+ * - display：画面に 大きく出す 表示（漢字など。ないときは kana を出す）
+ * - hint：えいたんごの 絵文字
+ */
+export type Word = { kana: string; units: Unit[]; display?: string; hint?: string };
 
 /** ステージ（time は 60 びょうで何もじ打てるか、english は えいたんご、weak は にがての とっくん） */
 export type StageId = "lv1" | "lv2" | "lv3" | "time" | "english" | "weak";
-
-/** ステージごとのことば（ひらがなだけ。ローマ字は romaji.ts で自動で作る） */
-const LISTS: Record<"lv1" | "lv2" | "lv3", string[]> = {
-  // Lv1 あいうえお：1〜2文字
-  lv1: [
-    "あ", "い", "う", "え", "お", "か", "き", "く", "け", "こ",
-    "いえ", "うえ", "あお", "かお", "いか", "えき", "あき", "いけ", "おか", "きく",
-  ],
-  // Lv2 みじかいことば：2〜3文字
-  lv2: [
-    "ねこ", "いぬ", "くま", "うさぎ", "さる", "たぬき", "りす", "ことり", "かえる", "めだか",
-    "かめ", "ぶた", "うま", "やぎ", "あり", "くり", "もも", "ぶどう", "すいか", "かき",
-    "もり", "やま", "うみ", "そら", "くも", "あめ", "はな", "はっぱ", "きのこ", "さかな",
-    "たまご", "しか", "きつね", "いちご", "みかん", "ほし", "つき", "ふね", "にじ", "ぱんだ", "きりん",
-  ],
-  // Lv3 ながいことば：4文字以上
-  lv3: [
-    "ひこうき", "おにぎり", "ありがとう", "おはよう", "どんぐり", "ともだち", "しんかんせん",
-    "かたつむり", "ちょうちょ", "でんしゃ", "ぎゅうにゅう", "とうもろこし", "ひまわり",
-    "にんじん", "らいおん", "せんせい", "がっこう", "ぺんぎん", "くわがた", "かぶとむし",
-  ],
-};
-
-/** えいたんご（絵文字の ヒントつき） */
-const ENGLISH: [string, string][] = [
-  ["cat", "🐱"], ["dog", "🐶"], ["fish", "🐟"], ["bird", "🐦"], ["frog", "🐸"],
-  ["bear", "🐻"], ["lion", "🦁"], ["duck", "🦆"], ["cow", "🐮"], ["pig", "🐷"],
-  ["apple", "🍎"], ["banana", "🍌"], ["lemon", "🍋"], ["grape", "🍇"], ["milk", "🥛"],
-  ["cake", "🍰"], ["egg", "🥚"], ["bread", "🍞"], ["sun", "☀️"], ["moon", "🌙"],
-  ["star", "⭐"], ["tree", "🌳"], ["book", "📕"], ["bus", "🚌"], ["car", "🚗"],
-  ["ball", "⚽"], ["pen", "🖊️"], ["cup", "🥤"], ["hat", "🎩"], ["rain", "🌧️"],
-];
-
-/** 英単語は 1文字ずつ そのまま打つ（ゆれなし） */
-function englishWord([word, hint]: [string, string]): Word {
-  return { kana: word, hint, units: [...word].map((ch) => ({ kana: ch, options: [ch] })) };
-}
 
 /** 1かいに出すことばの数 */
 export const WORDS_PER_ROUND = 10;
@@ -58,10 +28,23 @@ function shuffle<T>(list: T[]): T[] {
   return a;
 }
 
-function wordsFor(stage: StageId): Word[] {
-  if (stage === "english") return ENGLISH.map(englishWord);
-  const kana = stage === "time" || stage === "weak" ? [...LISTS.lv2, ...LISTS.lv3] : LISTS[stage];
-  return kana.map((k) => ({ kana: k, units: toUnits(k) }));
+function toWord(entry: Entry): Word {
+  if (typeof entry === "string") return { kana: entry, units: toUnits(entry) };
+  const [display, reading] = entry;
+  return { kana: reading, display, units: toUnits(reading) };
+}
+
+/** 英単語は 1文字ずつ そのまま打つ（ゆれなし） */
+function englishWord([word, hint]: [string, string]): Word {
+  return { kana: word, hint, units: [...word].map((ch) => ({ kana: ch, options: [ch] })) };
+}
+
+/** そのコース・ステージで 出す ことば ぜんぶ */
+export function wordsFor(stage: StageId, course: Course = "kids"): Word[] {
+  const lists = WORD_LISTS[course];
+  if (stage === "english") return lists.english.map(englishWord);
+  const entries = stage === "time" || stage === "weak" ? [...lists.lv2, ...lists.lv3] : lists[stage];
+  return entries.map(toWord);
 }
 
 /** ことばに、にがてな文字が どれだけ入っているか（標準の打ち方で数える） */
@@ -71,8 +54,8 @@ export function weakScore(word: Word, missStats: Record<string, number>): number
 }
 
 /** とっくん：にがてな文字が多い ことば 上位 20 こから、10 こを ランダムに出す */
-function pickWeakWords(missStats: Record<string, number>): Word[] {
-  const ranked = wordsFor("weak")
+function pickWeakWords(missStats: Record<string, number>, course: Course): Word[] {
+  const ranked = wordsFor("weak", course)
     .map((w) => ({ w, score: weakScore(w, missStats) }))
     .sort((a, b) => b.score - a.score)
     .slice(0, WORDS_PER_ROUND * 2)
@@ -81,8 +64,8 @@ function pickWeakWords(missStats: Record<string, number>): Word[] {
 }
 
 /** ステージのことばをランダムに選ぶ（同じことばは続けて出さない） */
-export function pickWords(stage: StageId, missStats: Record<string, number> = {}): Word[] {
-  if (stage === "weak") return pickWeakWords(missStats);
+export function pickWords(stage: StageId, missStats: Record<string, number> = {}, course: Course = "kids"): Word[] {
+  if (stage === "weak") return pickWeakWords(missStats, course);
   const n = stage === "time" ? Infinity : WORDS_PER_ROUND; // タイムアタックは全部をまぜて出す
-  return shuffle(wordsFor(stage)).slice(0, n);
+  return shuffle(wordsFor(stage, course)).slice(0, n);
 }

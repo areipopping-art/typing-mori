@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Character from "@/components/Character";
-import { STAGES, isShown, isUnlocked } from "@/lib/stages";
+import { isShown, isUnlocked, stagesFor } from "@/lib/stages";
 import { useData } from "@/lib/storage";
 
 export default function StagesPage() {
@@ -14,7 +14,7 @@ export default function StagesPage() {
   // 数字キー 1〜4 でも えらべる
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      const stage = STAGES.find((s) => s.key === e.key);
+      const stage = stagesFor(data.viewCourse).find((s) => s.key === e.key);
       if (stage && !e.repeat && isUnlocked(stage.id, data)) router.push(`/play?stage=${stage.id}`);
     };
     window.addEventListener("keydown", onKey);
@@ -25,7 +25,7 @@ export default function StagesPage() {
     <div className="flex flex-1 flex-col items-center gap-8">
       <Character message="どの ステージで あそぶ？" />
       <ul className="grid w-full max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2">
-        {STAGES.filter((s) => isShown(s.id, data)).map((s) => {
+        {stagesFor(data.viewCourse).filter((s) => isShown(s.id, data)).map((s) => {
           const open = isUnlocked(s.id, data);
           const star = data.stars[s.id] ?? 0;
           const best = data.best[s.id];

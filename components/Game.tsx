@@ -23,7 +23,8 @@ function finishRound(stage: StageId, game: GameState) {
   const next = nextStage(stage);
   const before = loadData();
   const mode = before.mode ?? "a";
-  const star = stars(speed, acc, mode);
+  const course = before.viewCourse;
+  const star = stars(speed, acc, mode, course);
   const nextWasOpen = next !== null && isUnlocked(next, before);
   const { newRecord, prevBest, newStickers, data } = recordResult(
     { stage, speed, acc, stars: star, mode },
@@ -40,6 +41,7 @@ function finishRound(stage: StageId, game: GameState) {
     unlocked: next !== null && !nextWasOpen && isUnlocked(next, data) ? next : null,
     newStickers,
     mode,
+    course,
     stars: star,
   });
 }
@@ -52,7 +54,7 @@ export default function Game({ stage }: { stage: StageId }) {
     if (!isUnlocked(stage, loadData())) router.replace("/stages");
   }, [stage, router]);
 
-  const [game, setGame] = useState(() => initGame(pickWords(stage, loadData().missStats), stage === "time" ? TIME_LIMIT : null));
+  const [game, setGame] = useState(() => initGame(pickWords(stage, loadData().missStats, loadData().viewCourse), stage === "time" ? TIME_LIMIT : null));
   const gameRef = useRef(game);
   const [reaction, setReaction] = useState<{ mood: Mood; message: string }>({
     mood: "normal",
@@ -133,6 +135,8 @@ export default function Game({ stage }: { stage: StageId }) {
 
   const word = game.words[game.index];
   const g = currentGuide(game);
+  const shown = word.display ?? word.kana;
+  const romajiLength = g.typed.length + g.rest.length;
   const done = game.finishedAt !== null;
   const elapsed =
     game.startedAt === null ? 0 : ((game.finishedAt ?? Math.max(now, game.startedAt)) - game.startedAt) / 1000;
@@ -172,15 +176,27 @@ export default function Game({ stage }: { stage: StageId }) {
       )}
       <Character mood={reaction.mood} message={reaction.message} />
       <div className="w-full max-w-2xl rounded-3xl border-2 border-[var(--card-border)] bg-[var(--card)] px-6 py-10 text-center">
-        <p className="text-[56px] font-extrabold leading-tight">
+        {/* 表示（漢字など）。長い文は 文字を小さくする */}
+        <p
+          className={`font-extrabold leading-tight ${
+            shown.length > 10 ? "text-3xl sm:text-4xl" : shown.length > 6 ? "text-4xl sm:text-5xl" : "text-[56px]"
+          }`}
+        >
           {word.hint && (
             <span className="mr-3" aria-hidden>
               {word.hint}
             </span>
           )}
-          {word.kana}
+          {shown}
         </p>
-        <p className="mt-4 font-mono text-[48px] font-bold tracking-wider" aria-label={`お手本 ${g.typed}${g.rest}`}>
+        {/* 漢字のときは 読みを 小さく出す */}
+        {word.display && <p className="mt-2 text-lg text-[var(--muted)]">{word.kana}</p>}
+        <p
+          className={`mt-4 break-all font-mono font-bold tracking-wider ${
+            romajiLength > 22 ? "text-2xl sm:text-3xl" : romajiLength > 12 ? "text-3xl sm:text-4xl" : "text-[48px]"
+          }`}
+          aria-label={`お手本 ${g.typed}${g.rest}`}
+        >
           <span className="text-[var(--ok)]">{g.typed}</span>
           {g.rest !== "" && (
             <span
