@@ -57,6 +57,7 @@ export type Data = {
   character: string;                           // えらんだ なかま（characters.ts の id）
   playDays: string[];                          // 遊んだ日（"2026-11-27"、古い順、最大 60 日）
   fingerGuide: boolean;                        // ゆびガイド（キーの色分けと 指の名前）
+  missStats: Record<string, number>;           // これまでに まちがえた文字と回数（とっくん用）
 };
 
 const DATA_KEY = "typing-mori";
@@ -73,6 +74,7 @@ export const EMPTY_DATA: Data = {
   character: DEFAULT_CHARACTER,
   playDays: [],
   fingerGuide: true,
+  missStats: {},
 };
 
 let cache: { raw: string | null; data: Data } | null = null;
@@ -134,8 +136,17 @@ export function useData(): Data {
   return useSyncExternalStore(subscribe, loadData, () => EMPTY_DATA);
 }
 
-/** 1かい遊び終えたときに、記録・★・履歴を保存する */
-export function recordResult(item: Omit<HistoryItem, "at">): {
+function addCounts(a: Record<string, number>, b: Record<string, number>): Record<string, number> {
+  const out = { ...a };
+  for (const [k, v] of Object.entries(b)) out[k] = (out[k] ?? 0) + v;
+  return out;
+}
+
+/** 1かい遊び終えたときに、記録・★・履歴・まちがえた文字を保存する */
+export function recordResult(
+  item: Omit<HistoryItem, "at">,
+  missChars: Record<string, number> = {},
+): {
   newRecord: boolean;
   prevBest: number | null;
   newStickers: string[];
@@ -151,6 +162,7 @@ export function recordResult(item: Omit<HistoryItem, "at">): {
     best: newRecord ? { ...before.best, [item.stage]: item.speed } : before.best,
     stars: { ...before.stars, [item.stage]: Math.max(before.stars[item.stage] ?? 0, item.stars) as 1 | 2 | 3 },
     history: [{ ...item, at: new Date().toISOString() }, ...before.history].slice(0, HISTORY_MAX),
+    missStats: addCounts(before.missStats, missChars),
     playDays: before.playDays.includes(dayKey())
       ? before.playDays
       : [...before.playDays, dayKey()].slice(-PLAY_DAYS_MAX),

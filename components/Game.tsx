@@ -22,7 +22,10 @@ function finishRound(stage: StageId, game: GameState) {
   const acc = accuracy(game);
   const next = nextStage(stage);
   const nextWasOpen = next !== null && isUnlocked(next, loadData());
-  const { newRecord, prevBest, newStickers, data } = recordResult({ stage, speed, acc, stars: stars(speed, acc) });
+  const { newRecord, prevBest, newStickers, data } = recordResult(
+    { stage, speed, acc, stars: stars(speed, acc) },
+    game.missChars,
+  );
   saveLast({
     stage,
     correct: game.correct,
@@ -44,7 +47,7 @@ export default function Game({ stage }: { stage: StageId }) {
     if (!isUnlocked(stage, loadData())) router.replace("/stages");
   }, [stage, router]);
 
-  const [game, setGame] = useState(() => initGame(pickWords(stage), stage === "time" ? TIME_LIMIT : null));
+  const [game, setGame] = useState(() => initGame(pickWords(stage, loadData().missStats), stage === "time" ? TIME_LIMIT : null));
   const gameRef = useRef(game);
   const [reaction, setReaction] = useState<{ mood: Mood; message: string }>({
     mood: "normal",

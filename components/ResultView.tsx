@@ -107,6 +107,14 @@ export default function ResultView() {
             ))}
           </ul>
         )}
+        {misses.length > 0 && (
+          <Link
+            href="/play?stage=weak"
+            className="mt-4 inline-block rounded-full border-2 border-[var(--accent)] px-6 py-2 font-bold text-[var(--accent)]"
+          >
+            💪 にがてを とっくん する
+          </Link>
+        )}
       </div>
 
       <div className="flex flex-wrap justify-center gap-4">

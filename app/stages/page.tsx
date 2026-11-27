@@ -25,7 +25,7 @@ export default function StagesPage() {
     <div className="flex flex-1 flex-col items-center gap-8">
       <Character message="どの ステージで あそぶ？" />
       <ul className="grid w-full max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2">
-        {STAGES.map((s, i) => {
+        {STAGES.map((s) => {
           const open = isUnlocked(s.id, data);
           const star = data.stars[s.id] ?? 0;
           const best = data.best[s.id];
@@ -39,7 +39,7 @@ export default function StagesPage() {
               </div>
               <p className="mt-2 text-2xl font-extrabold">{s.name}</p>
               <p className="text-sm text-[var(--muted)]">
-                {open ? s.desc : `${STAGES[i - 1].name.split(" ")[0]} で ★3 を とると ひらくよ`}
+                {open ? s.desc : s.lockHint}
               </p>
               {open && (
                 <p className="mt-3 flex items-center justify-between">

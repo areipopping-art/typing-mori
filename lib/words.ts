@@ -3,8 +3,8 @@ import { toUnits, type Unit } from "./romaji";
 /** 出題する ことば。kana は画面に大きく出す文字（えいたんごでは英単語）、hint は絵文字 */
 export type Word = { kana: string; units: Unit[]; hint?: string };
 
-/** ステージ（time は 60 びょうで何もじ打てるか、english は えいたんご） */
-export type StageId = "lv1" | "lv2" | "lv3" | "time" | "english";
+/** ステージ（time は 60 びょうで何もじ打てるか、english は えいたんご、weak は にがての とっくん） */
+export type StageId = "lv1" | "lv2" | "lv3" | "time" | "english" | "weak";
 
 /** ステージごとのことば（ひらがなだけ。ローマ字は romaji.ts で自動で作る） */
 const LISTS: Record<"lv1" | "lv2" | "lv3", string[]> = {
@@ -60,12 +60,29 @@ function shuffle<T>(list: T[]): T[] {
 
 function wordsFor(stage: StageId): Word[] {
   if (stage === "english") return ENGLISH.map(englishWord);
-  const kana = stage === "time" ? [...LISTS.lv2, ...LISTS.lv3] : LISTS[stage];
+  const kana = stage === "time" || stage === "weak" ? [...LISTS.lv2, ...LISTS.lv3] : LISTS[stage];
   return kana.map((k) => ({ kana: k, units: toUnits(k) }));
 }
 
+/** ことばに、にがてな文字が どれだけ入っているか（標準の打ち方で数える） */
+export function weakScore(word: Word, missStats: Record<string, number>): number {
+  const romaji = word.units.map((u) => u.options[0]).join("");
+  return [...romaji].reduce((sum, ch) => sum + (missStats[ch] ?? 0), 0);
+}
+
+/** とっくん：にがてな文字が多い ことば 上位 20 こから、10 こを ランダムに出す */
+function pickWeakWords(missStats: Record<string, number>): Word[] {
+  const ranked = wordsFor("weak")
+    .map((w) => ({ w, score: weakScore(w, missStats) }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, WORDS_PER_ROUND * 2)
+    .map((x) => x.w);
+  return shuffle(ranked).slice(0, WORDS_PER_ROUND);
+}
+
 /** ステージのことばをランダムに選ぶ（同じことばは続けて出さない） */
-export function pickWords(stage: StageId): Word[] {
+export function pickWords(stage: StageId, missStats: Record<string, number> = {}): Word[] {
+  if (stage === "weak") return pickWeakWords(missStats);
   const n = stage === "time" ? Infinity : WORDS_PER_ROUND; // タイムアタックは全部をまぜて出す
   return shuffle(wordsFor(stage)).slice(0, n);
 }
