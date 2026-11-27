@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import { DEFAULT_CHARACTER } from "./characters";
 import { earnedStickers } from "./stickers";
 import type { StageId } from "./words";
 
@@ -52,13 +53,21 @@ export type Data = {
   stickers: string[];                          // もらったシールの id
   sound: boolean;                              // 効果音
   history: HistoryItem[];                      // 練習の記録（新しい順、最大 100 件）
+  character: string;                           // えらんだ なかま（characters.ts の id）
 };
 
 const DATA_KEY = "typing-mori";
 const CHANGE_EVENT = "typing-mori-change";
 const HISTORY_MAX = 100;
 
-export const EMPTY_DATA: Data = { best: {}, stars: {}, stickers: [], sound: true, history: [] };
+export const EMPTY_DATA: Data = {
+  best: {},
+  stars: {},
+  stickers: [],
+  sound: true,
+  history: [],
+  character: DEFAULT_CHARACTER,
+};
 
 let cache: { raw: string | null; data: Data } | null = null;
 

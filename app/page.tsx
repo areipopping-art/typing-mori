@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Character from "@/components/Character";
+import { CHARACTERS, characterOf } from "@/lib/characters";
 import { STAGES } from "@/lib/stages";
-import { useData } from "@/lib/storage";
+import { saveData, useData } from "@/lib/storage";
 
 export default function Home() {
   const router = useRouter();
@@ -26,7 +27,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-10 text-center">
-      <Character mood="happy" message="いっしょに れんしゅう しよう！" />
+      <Character mood="happy" message={`${characterOf(data.character).name}と いっしょに れんしゅう しよう！`} />
       <div className="space-y-2">
         <h1 className="text-4xl font-extrabold">タイピングのもり</h1>
         <p className="text-[var(--muted)]">ひらがなの ことばを ローマじで うってみよう。1かい 10こ だよ。</p>
@@ -45,6 +46,31 @@ export default function Home() {
             ))}
           </ul>
         )}
+      </div>
+      <div>
+        <p className="mb-2 text-sm text-[var(--muted)]">いっしょに あそぶ なかまを えらんでね</p>
+        <div className="flex flex-wrap justify-center gap-2" role="radiogroup" aria-label="なかまを えらぶ">
+          {CHARACTERS.map((c) => {
+            const selected = c.id === data.character;
+            return (
+              <button
+                key={c.id}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                aria-label={c.name}
+                onClick={() => saveData({ ...data, character: c.id })}
+                className={`rounded-2xl border-2 px-3 py-1 text-4xl transition ${
+                  selected
+                    ? "border-[var(--accent)] bg-[var(--card)] shadow-[0_4px_0_var(--card-border)]"
+                    : "border-transparent opacity-60 hover:opacity-100"
+                }`}
+              >
+                {c.emoji}
+              </button>
+            );
+          })}
+        </div>
       </div>
       <Link
         href="/stages"
