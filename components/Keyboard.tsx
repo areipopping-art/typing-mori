@@ -12,8 +12,17 @@ const INDENT = ["pl-0", "pl-4 sm:pl-6", "pl-8 sm:pl-12"];
  * - wrong：いま まちがえて押したキー（赤くする）
  * - ゆびガイドがオンなら、キーを 打つ指ごとに色分けし、次のキーを打つ指の名前を出す
  */
-export default function Keyboard({ next, wrong }: { next?: string; wrong?: string | null }) {
-  const { fingerGuide } = useData();
+export default function Keyboard({
+  next,
+  wrong,
+  guide,
+}: {
+  next?: string;
+  wrong?: string | null;
+  guide?: boolean; // ゆびガイドを出すか（省略時は 設定に したがう）
+}) {
+  const data = useData();
+  const fingerGuide = guide ?? data.fingerGuide;
   const nextFinger = fingerOf(next);
 
   return (

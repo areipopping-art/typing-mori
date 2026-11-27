@@ -112,7 +112,7 @@ export default function ParentsPage() {
           <span>
             指のガイド
             <span className="block text-sm text-[var(--muted)]">
-              画面のキーボードを打つ指ごとに色分けし、次に使う指の名前を表示します
+              チャレンジ モードで、画面のキーボードを打つ指ごとに色分けし、次に使う指の名前を表示します（はじめて モードでは いつも表示）
             </span>
           </span>
           <input

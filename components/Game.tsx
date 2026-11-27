@@ -9,7 +9,7 @@ import { keyToChar } from "@/lib/keys";
 import { accuracy, speedPerMinute, stars } from "@/lib/score";
 import { playSound } from "@/lib/sound";
 import { isUnlocked, nextStage } from "@/lib/stages";
-import { loadData, recordResult, saveLast } from "@/lib/storage";
+import { loadData, recordResult, saveData, saveLast, useData } from "@/lib/storage";
 import { pickWords, TIME_LIMIT, type StageId } from "@/lib/words";
 
 const PRAISE = ["いいね！", "すごい！", "じょうず！", "その ちょうし！"];
@@ -126,6 +126,11 @@ export default function Game({ stage }: { stage: StageId }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [stage, router]);
 
+  const data = useData();
+  const mode = data.mode ?? "a";
+  // はじめて モードは キーボードを いつも出す。チャレンジ モードは ボタンで 出し入れ
+  const showKeyboard = mode === "a" || data.showKeyboardB;
+
   const word = game.words[game.index];
   const g = currentGuide(game);
   const done = game.finishedAt !== null;
@@ -133,11 +138,17 @@ export default function Game({ stage }: { stage: StageId }) {
     game.startedAt === null ? 0 : ((game.finishedAt ?? Math.max(now, game.startedAt)) - game.startedAt) / 1000;
   const left = game.words.length - game.index - (done ? 1 : 0);
   const timeLeft = game.timeLimit === null ? 0 : Math.max(0, Math.ceil(game.timeLimit - elapsed));
+  // チャレンジ モード：打ちながらの はやさ と せいかくさ（1びょう たってから 出す）
+  const liveSpeed = elapsed >= 1 ? speedPerMinute({ correct: game.correct, seconds: elapsed }) : null;
+  const liveAcc = game.correct + game.miss > 0 ? accuracy(game) : null;
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-8">
-      <div className="flex w-full max-w-2xl justify-between text-xl font-bold">
-        {game.timeLimit === null ? (
+      <div className="flex w-full max-w-2xl flex-wrap justify-between gap-2 text-xl font-bold">
+        {mode === "a" ? (
+          // はじめて モード：じかんは 出さず、のこりの数だけ
+          <span className="mx-auto">のこり {left} こ</span>
+        ) : game.timeLimit === null ? (
           <>
             <span>⏱ {elapsed.toFixed(1)} びょう</span>
             <span>のこり {left} こ</span>
@@ -149,6 +160,16 @@ export default function Game({ stage }: { stage: StageId }) {
           </>
         )}
       </div>
+      {mode === "b" && (
+        <div className="flex w-full max-w-2xl justify-center gap-6 text-lg" aria-live="off">
+          <span>
+            🚀 いまの はやさ <b className="text-2xl text-[var(--accent)]">{liveSpeed ?? "—"}</b> もじ/ぷん
+          </span>
+          <span>
+            🎯 せいかくさ <b className="text-2xl text-[var(--accent)]">{liveAcc ?? "—"}</b> %
+          </span>
+        </div>
+      )}
       <Character mood={reaction.mood} message={reaction.message} />
       <div className="w-full max-w-2xl rounded-3xl border-2 border-[var(--card-border)] bg-[var(--card)] px-6 py-10 text-center">
         <p className="text-[56px] font-extrabold leading-tight">
@@ -174,7 +195,21 @@ export default function Game({ stage }: { stage: StageId }) {
           <span className="text-[var(--todo)]">{g.rest.slice(1)}</span>
         </p>
       </div>
-      {!done && <Keyboard next={g.rest[0]} wrong={wrongKey} />}
+      {!done && showKeyboard && (
+        <Keyboard next={g.rest[0]} wrong={wrongKey} guide={mode === "a" || data.fingerGuide} />
+      )}
+      {!done && mode === "b" && (
+        <button
+          type="button"
+          onClick={(e) => {
+            saveData({ ...data, showKeyboardB: !data.showKeyboardB });
+            e.currentTarget.blur(); // Enter で また押されないように
+          }}
+          className="rounded-full border-2 border-[var(--card-border)] bg-[var(--card)] px-4 py-1 text-sm font-bold"
+        >
+          ⌨ キーボードを {showKeyboard ? "かくす" : "みせる"}
+        </button>
+      )}
       {done ? (
         <p className="text-2xl font-bold text-[var(--accent)]">
           {game.timeLimit === null ? "ぜんぶ うてたね！" : "タイムアップ！"}

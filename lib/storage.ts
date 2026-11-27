@@ -63,6 +63,7 @@ export type Data = {
   fingerGuide: boolean;                        // ゆびガイド（キーの色分けと 指の名前）
   missStats: Record<string, number>;           // これまでに まちがえた文字と回数（とっくん用）
   mode: Mode | null;                           // あそびかたの モード（null は まだ えらんでいない）
+  showKeyboardB: boolean;                      // チャレンジ モードで 画面キーボードを出すか
 };
 
 const DATA_KEY = "typing-mori";
@@ -81,6 +82,7 @@ export const EMPTY_DATA: Data = {
   fingerGuide: true,
   missStats: {},
   mode: null,
+  showKeyboardB: false,
 };
 
 let cache: { raw: string | null; data: Data } | null = null;
