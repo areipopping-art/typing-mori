@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+/*
+ * もりのパステル（緑×黄）
+ * - 薄い色は背景・枠に、文字には濃い色を使い読みやすさを守る
+ */
+:root {
+  --background: #f3faeb;
+  --foreground: #2f3b26;
+  --muted: #6b7a5e;
+  --card: #ffffff;
+  --card-border: #d6ecc0;
+  --accent: #3f8f2f;      /* ボタン・正解の色 */
+  --accent-text: #ffffff;
+  --ok: #2e8b3a;          /* 打てた文字 */
+  --ng: #d93636;          /* まちがえた文字 */
+  --ng-bg: #ffe1e1;
+  --sun: #f6c445;         /* ★・しんきろく */
+  --todo: #9aa58f;        /* まだ打っていない文字 */
+  --app-font: var(--font-m-plus-rounded), "Hiragino Maru Gothic ProN", "Hiragino Sans", "Noto Sans JP", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #18210f;
+    --foreground: #e6f0dc;
+    --muted: #a7b69a;
+    --card: #222e18;
+    --card-border: #34462a;
+    --accent: #6cc35a;
+    --accent-text: #10200a;
+    --ok: #7fdc7a;
+    --ng: #ff7a7a;
+    --ng-bg: #4a2424;
+    --sun: #f6d06a;
+    --todo: #7a8870;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--app-font);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--app-font);
+}
