@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { DEFAULT_CHARACTER } from "./characters";
 import { dayKey } from "./days";
+import type { Mode } from "./modes";
 import { earnedStickers } from "./stickers";
 import type { StageId } from "./words";
 
@@ -58,6 +59,7 @@ export type Data = {
   playDays: string[];                          // 遊んだ日（"2026-11-27"、古い順、最大 60 日）
   fingerGuide: boolean;                        // ゆびガイド（キーの色分けと 指の名前）
   missStats: Record<string, number>;           // これまでに まちがえた文字と回数（とっくん用）
+  mode: Mode | null;                           // あそびかたの モード（null は まだ えらんでいない）
 };
 
 const DATA_KEY = "typing-mori";
@@ -75,6 +77,7 @@ export const EMPTY_DATA: Data = {
   playDays: [],
   fingerGuide: true,
   missStats: {},
+  mode: null,
 };
 
 let cache: { raw: string | null; data: Data } | null = null;

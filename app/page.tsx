@@ -5,7 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Character from "@/components/Character";
+import ModeChooser from "@/components/ModeChooser";
 import { CHARACTERS, characterOf } from "@/lib/characters";
+import { modeOf } from "@/lib/modes";
 import { STAGES } from "@/lib/stages";
 import { saveData, useData } from "@/lib/storage";
 
@@ -20,14 +22,24 @@ export default function Home() {
   // Space キーでも あそべる
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.code === "Space" && !e.repeat) {
+      if (e.code === "Space" && !e.repeat && data.mode) {
         e.preventDefault();
         router.push("/stages");
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [router]);
+  }, [router, data.mode]);
+
+  // はじめて ひらいたとき（モードを まだ えらんでいない）は、モードえらびだけを出す
+  if (!data.mode) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-8 text-center">
+        <Character mood="happy" message="タイピングのもりへ ようこそ！" />
+        <ModeChooser />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-10 text-center">
@@ -77,6 +89,13 @@ export default function Home() {
           })}
         </div>
       </div>
+      <button
+        type="button"
+        onClick={() => saveData({ ...data, mode: null })}
+        className="text-sm text-[var(--muted)] underline"
+      >
+        いまは {modeOf(data.mode).emoji} {modeOf(data.mode).name}（モードを かえる）
+      </button>
       <Link
         href="/stages"
         className="rounded-full bg-[var(--accent)] px-16 py-5 text-3xl font-extrabold text-[var(--accent-text)] shadow-[0_6px_0_rgb(0_0_0/0.15)] transition active:translate-y-1 active:shadow-none"

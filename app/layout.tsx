@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { M_PLUS_Rounded_1c } from "next/font/google";
 import Link from "next/link";
+import HeaderNav from "@/components/HeaderNav";
 import "./globals.css";
 
 // 丸ゴシック（日本語は文字数が多いため、先読みはせず表示しながら読み込む）
@@ -25,14 +26,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <Link href="/" className="text-xl font-extrabold text-[var(--accent)]">
               🌳 タイピングのもり
             </Link>
-            <nav className="flex gap-2 text-lg font-bold">
-              <Link href="/stages" className="rounded-full px-3 py-1 hover:bg-[var(--background)]">
-                🗺 ステージ
-              </Link>
-              <Link href="/stickers" className="rounded-full px-3 py-1 hover:bg-[var(--background)]">
-                📖 ずかん
-              </Link>
-            </nav>
+            <HeaderNav />
           </div>
         </header>
         <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-8">{children}</main>
