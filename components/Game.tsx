@@ -10,6 +10,7 @@ import { accuracy, speedPerMinute, stars } from "@/lib/score";
 import { playSound } from "@/lib/sound";
 import { isUnlocked, nextStage } from "@/lib/stages";
 import { loadData, recordResult, saveData, saveLast, useData } from "@/lib/storage";
+import { pickLine, selectedCharacter } from "@/lib/characters";
 import { textsFor } from "@/lib/texts";
 import { pickWords, TIME_LIMIT, type StageId } from "@/lib/words";
 
@@ -108,6 +109,7 @@ export default function Game({ stage }: { stage: StageId }) {
       setGame(next);
       if (result === "ignored") return;
       const tt = textsFor(loadData().course);
+      const me = selectedCharacter(loadData());
       playSound(result === "wrong" ? "ng" : result === "word-done" ? "word" : result === "finished" ? "clear" : "ok");
       if (result === "wrong") {
         // 押したキーを 画面キーボードで 一瞬 赤くする
@@ -115,9 +117,10 @@ export default function Game({ stage }: { stage: StageId }) {
         clearTimeout(wrongTimer.current);
         wrongTimer.current = setTimeout(() => setWrongKey(null), 350);
         const expected = expectedChar(before);
-        setReaction({ mood: "surprised", message: tt.miss(expected ?? "?") });
+        setReaction({ mood: "surprised", message: pickLine(me.miss, tt.miss)(expected ?? "?") });
       } else if (result === "word-done") {
-        setReaction({ mood: "happy", message: tt.praise[Math.floor(Math.random() * tt.praise.length)] });
+        const praise = pickLine(me.praise, tt.praise);
+        setReaction({ mood: "happy", message: praise[Math.floor(Math.random() * praise.length)] });
       } else if (result === "finished") {
         setReaction({ mood: "happy", message: tt.finish });
         finishRound(stage, next);

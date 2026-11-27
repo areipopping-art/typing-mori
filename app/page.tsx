@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import Character from "@/components/Character";
 import CourseChooser from "@/components/CourseChooser";
 import ModeChooser from "@/components/ModeChooser";
-import { CHARACTERS, characterOf } from "@/lib/characters";
+import { charactersFor, selectedCharacter } from "@/lib/characters";
 import { courseOf } from "@/lib/courses";
 import { modeOf } from "@/lib/modes";
 import { stagesFor } from "@/lib/stages";
@@ -21,6 +21,7 @@ export default function Home() {
   const router = useRouter();
   const data = useData();
   const t = textsFor(data.course);
+  const me = selectedCharacter(data);
   const records = stagesFor(data.viewCourse).filter((s) => data.best[s.id] !== undefined);
 
   // Space キーでも あそべる
@@ -55,7 +56,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-10 text-center">
-      <Character mood="happy" message={t.greet(characterOf(data.character).name)} />
+      <Character mood="happy" message={me.greet ?? t.greet(me.name)} />
       <div className="space-y-2">
         <h1 className="text-4xl font-extrabold">{courseOf(data.course).appName}</h1>
         <p className="text-[var(--muted)]">{t.homeLead}</p>
@@ -79,8 +80,8 @@ export default function Home() {
       <div>
         <p className="mb-2 text-sm text-[var(--muted)]">{t.chooseCharacter}</p>
         <div className="flex flex-wrap justify-center gap-2" role="radiogroup" aria-label="なかまを えらぶ">
-          {CHARACTERS.map((c) => {
-            const selected = c.id === data.character;
+          {charactersFor(data.course).map((c) => {
+            const selected = c.id === me.id;
             return (
               <button
                 key={c.id}
@@ -88,7 +89,10 @@ export default function Home() {
                 role="radio"
                 aria-checked={selected}
                 aria-label={c.name}
-                onClick={() => saveData({ ...data, character: c.id })}
+                onClick={() =>
+                  saveData({ ...data, characterByCourse: { ...data.characterByCourse, [data.viewCourse]: c.id } })
+                }
+                title={c.name}
                 className={`rounded-2xl border-2 px-3 py-1 text-4xl transition ${
                   selected
                     ? "border-[var(--accent)] bg-[var(--card)] shadow-[0_4px_0_var(--card-border)]"
@@ -96,10 +100,12 @@ export default function Home() {
                 }`}
               >
                 {c.emoji}
+                {c.badge && <span className="text-xl">{c.badge}</span>}
               </button>
             );
           })}
         </div>
+        <p className="mt-2 text-sm font-bold">{me.name}</p>
       </div>
       <button
         type="button"

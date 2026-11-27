@@ -74,7 +74,8 @@ export type Data = {
   stickers: string[];                          // もらったシールの id
   sound: boolean;                              // 効果音
   history: HistoryItem[];                      // 練習の記録（新しい順、最大 100 件）
-  character: string;                           // えらんだ なかま（characters.ts の id）
+  character: string;                           // えらんだ なかま（子どもコース。コースを入れる前からの値）
+  characterByCourse: Partial<Record<Course, string>>; // コースごとに えらんだ キャラクター
   playDays: string[];                          // 遊んだ日（"2026-11-27"、古い順、最大 60 日）
   fingerGuide: boolean;                        // ゆびガイド（キーの色分けと 指の名前）
   missStats: Record<string, number>;           // これまでに まちがえた文字と回数（とっくん用）
@@ -100,6 +101,7 @@ export const EMPTY_DATA: Data = {
   sound: true,
   history: [],
   character: DEFAULT_CHARACTER,
+  characterByCourse: {},
   playDays: [],
   fingerGuide: true,
   missStats: {},
