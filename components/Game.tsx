@@ -7,6 +7,7 @@ import Keyboard from "@/components/Keyboard";
 import { currentGuide, expectedChar, initGame, timeUp, typeChar, type GameState } from "@/lib/game";
 import { keyToChar } from "@/lib/keys";
 import { accuracy, speedPerMinute, stars } from "@/lib/score";
+import { playSound } from "@/lib/sound";
 import { isUnlocked, nextStage } from "@/lib/stages";
 import { loadData, recordResult, saveLast } from "@/lib/storage";
 import { pickWords, TIME_LIMIT, type StageId } from "@/lib/words";
@@ -66,6 +67,7 @@ export default function Game({ stage }: { stage: StageId }) {
         gameRef.current = ended;
         setGame(ended);
         setReaction({ mood: "happy", message: "タイムアップ！" });
+        playSound("clear");
         finishRound(stage, ended);
       }
     }, 100);
@@ -89,6 +91,8 @@ export default function Game({ stage }: { stage: StageId }) {
       const [next, result] = typeChar(before, ch, performance.now());
       gameRef.current = next;
       setGame(next);
+      if (result === "ignored") return;
+      playSound(result === "wrong" ? "ng" : result === "word-done" ? "word" : result === "finished" ? "clear" : "ok");
       if (result === "wrong") {
         // 押したキーを 画面キーボードで 一瞬 赤くする
         setWrongKey(ch);
