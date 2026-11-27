@@ -2,23 +2,22 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect } from "react";
 import Character from "@/components/Character";
-import { loadBest } from "@/lib/storage";
-
-// さいこうきろくは localStorage にあるので、サーバーでの描画時は「なし」として扱う
-const subscribe = () => () => {};
+import { STAGES } from "@/lib/stages";
+import { useData } from "@/lib/storage";
 
 export default function Home() {
   const router = useRouter();
-  const best = useSyncExternalStore(subscribe, loadBest, () => null);
+  const data = useData();
+  const records = STAGES.filter((s) => data.best[s.id] !== undefined);
 
   // Space キーでも あそべる
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.code === "Space" && !e.repeat) {
         e.preventDefault();
-        router.push("/play");
+        router.push("/stages");
       }
     };
     window.addEventListener("keydown", onKey);
@@ -33,17 +32,22 @@ export default function Home() {
         <p className="text-[var(--muted)]">ひらがなの ことばを ローマじで うってみよう。1かい 10こ だよ。</p>
       </div>
       <div className="rounded-3xl border-2 border-[var(--card-border)] bg-[var(--card)] px-8 py-4">
-        <p className="text-sm text-[var(--muted)]">🏆 さいこうきろく</p>
-        {best === null ? (
+        <p className="text-sm text-[var(--muted)]">🏆 さいこうきろく（1ぷんで なんもじ）</p>
+        {records.length === 0 ? (
           <p className="text-lg font-bold">まだ ないよ。あそんで きろくを つくろう！</p>
         ) : (
-          <p className="text-2xl font-bold">
-            1ぷんで <span className="text-4xl font-extrabold text-[var(--accent)]">{best}</span> もじ
-          </p>
+          <ul className="mt-1 flex flex-wrap justify-center gap-x-6 gap-y-1">
+            {records.map((s) => (
+              <li key={s.id} className="font-bold">
+                {s.emoji} {s.name.split(" ")[0]}{" "}
+                <span className="text-2xl font-extrabold text-[var(--accent)]">{data.best[s.id]}</span>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
       <Link
-        href="/play"
+        href="/stages"
         className="rounded-full bg-[var(--accent)] px-16 py-5 text-3xl font-extrabold text-[var(--accent-text)] shadow-[0_6px_0_rgb(0_0_0/0.15)] transition active:translate-y-1 active:shadow-none"
       >
         ▶ あそぶ

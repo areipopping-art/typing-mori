@@ -3,17 +3,45 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Character, { type Mood } from "@/components/Character";
-import { currentGuide, expectedChar, initGame, typeChar } from "@/lib/game";
+import { currentGuide, expectedChar, initGame, typeChar, type GameState } from "@/lib/game";
 import { keyToChar } from "@/lib/keys";
-import { speedPerMinute } from "@/lib/score";
-import { saveLast, updateBest } from "@/lib/storage";
-import { pickWords } from "@/lib/words";
+import { accuracy, speedPerMinute, stars } from "@/lib/score";
+import { isUnlocked, nextStage } from "@/lib/stages";
+import { loadData, recordResult, saveLast } from "@/lib/storage";
+import { pickWords, type StageId } from "@/lib/words";
 
 const PRAISE = ["いいね！", "すごい！", "じょうず！", "その ちょうし！"];
 
-export default function Game() {
+/** 1かい おわったときに、記録を保存して けっかページへ わたす */
+function finishRound(stage: StageId, game: GameState) {
+  if (game.finishedAt === null || game.startedAt === null) return;
+  const seconds = (game.finishedAt - game.startedAt) / 1000;
+  const speed = speedPerMinute({ correct: game.correct, seconds });
+  const acc = accuracy(game);
+  const next = nextStage(stage);
+  const nextWasOpen = next !== null && isUnlocked(next, loadData());
+  const { newRecord, prevBest, data } = recordResult({ stage, speed, acc, stars: stars(speed, acc) });
+  saveLast({
+    stage,
+    correct: game.correct,
+    miss: game.miss,
+    seconds,
+    missChars: game.missChars,
+    newRecord,
+    prevBest,
+    unlocked: next !== null && !nextWasOpen && isUnlocked(next, data) ? next : null,
+  });
+}
+
+export default function Game({ stage }: { stage: StageId }) {
   const router = useRouter();
-  const [game, setGame] = useState(() => initGame(pickWords("lv2")));
+
+  // まだ ひらいていない ステージを URL で開いたときは ステージえらびへ
+  useEffect(() => {
+    if (!isUnlocked(stage, loadData())) router.replace("/stages");
+  }, [stage, router]);
+
+  const [game, setGame] = useState(() => initGame(pickWords(stage)));
   const gameRef = useRef(game);
   const [reaction, setReaction] = useState<{ mood: Mood; message: string }>({
     mood: "normal",
@@ -29,20 +57,13 @@ export default function Game() {
     return () => clearInterval(id);
   }, [running]);
 
-  // ぜんぶ打ち終えたら結果を保存して、けっかページへ
+  // ぜんぶ打ち終えたら、けっかページへ（「ぜんぶ うてたね！」を少し見せる）
+  const finished = game.finishedAt !== null;
   useEffect(() => {
-    if (game.finishedAt === null || game.startedAt === null) return;
-    const seconds = (game.finishedAt - game.startedAt) / 1000;
-    saveLast({
-      correct: game.correct,
-      miss: game.miss,
-      seconds,
-      missChars: game.missChars,
-      newRecord: updateBest(speedPerMinute({ correct: game.correct, seconds })),
-    });
-    const id = setTimeout(() => router.push("/result"), 600); // 「ぜんぶ うてたね！」を少し見せる
+    if (!finished) return;
+    const id = setTimeout(() => router.push("/result"), 600);
     return () => clearTimeout(id);
-  }, [game, router]);
+  }, [finished, router]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -60,13 +81,14 @@ export default function Game() {
         setReaction({ mood: "happy", message: PRAISE[Math.floor(Math.random() * PRAISE.length)] });
       } else if (result === "finished") {
         setReaction({ mood: "happy", message: "やったね！" });
+        finishRound(stage, next);
       } else if (result === "correct") {
         setReaction((r) => (r.mood === "surprised" ? { mood: "normal", message: "そう そう！" } : r));
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [stage]);
 
   const word = game.words[game.index];
   const g = currentGuide(game);

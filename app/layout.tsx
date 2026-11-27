@@ -21,10 +21,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="ja" className={`${rounded.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <header className="border-b border-[var(--card-border)] bg-[var(--card)]">
-          <div className="mx-auto flex max-w-4xl items-center px-4 py-3">
+          <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 py-3">
             <Link href="/" className="text-xl font-extrabold text-[var(--accent)]">
               🌳 タイピングのもり
             </Link>
+            <nav className="flex gap-2 text-lg font-bold">
+              <Link href="/stages" className="rounded-full px-3 py-1 hover:bg-[var(--background)]">
+                🗺 ステージ
+              </Link>
+            </nav>
           </div>
         </header>
         <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-8">{children}</main>

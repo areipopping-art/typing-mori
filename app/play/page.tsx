@@ -1,10 +1,7 @@
-"use client";
+import PlayClient from "@/components/PlayClient";
+import { isStageId } from "@/lib/stages";
 
-import dynamic from "next/dynamic";
-
-// ことばはランダムに選ぶので、サーバーでは描画せずブラウザだけで作る
-const Game = dynamic(() => import("@/components/Game"), { ssr: false });
-
-export default function PlayPage() {
-  return <Game />;
+export default async function PlayPage(props: PageProps<"/play">) {
+  const { stage } = await props.searchParams;
+  return <PlayClient stage={isStageId(stage) ? stage : "lv1"} />;
 }

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Character from "@/components/Character";
 import Confetti from "@/components/Confetti";
 import { accuracy, sortMissChars, speedPerMinute, stars } from "@/lib/score";
+import { stageOf } from "@/lib/stages";
 import { loadLast } from "@/lib/storage";
 
 const STAR_MESSAGE = {
@@ -26,11 +27,11 @@ export default function ResultView() {
   // Enter で もういっかい
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Enter" && !e.repeat) router.push("/play");
+      if (e.key === "Enter" && !e.repeat && result) router.push(`/play?stage=${result.stage}`);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [router]);
+  }, [router, result]);
 
   if (!result) return null;
 
@@ -48,6 +49,14 @@ export default function ResultView() {
         </p>
       )}
       <Character mood="happy" message={STAR_MESSAGE[star]} />
+      <p className="-mt-4 text-sm font-bold text-[var(--muted)]">
+        {stageOf(result.stage).emoji} {stageOf(result.stage).name}
+      </p>
+      {result.unlocked && (
+        <p className="rounded-full bg-[var(--sun)] px-6 py-2 text-xl font-extrabold text-[#3b2a00]">
+          🔓 {stageOf(result.unlocked).name} が ひらいたよ！
+        </p>
+      )}
 
       <p className="text-6xl tracking-widest" aria-label={`ほし ${star} こ`}>
         {[1, 2, 3].map((n) => (
@@ -93,16 +102,16 @@ export default function ResultView() {
 
       <div className="flex flex-wrap justify-center gap-4">
         <Link
-          href="/play"
+          href={`/play?stage=${result.stage}`}
           className="rounded-full bg-[var(--accent)] px-10 py-4 text-2xl font-extrabold text-[var(--accent-text)] shadow-[0_6px_0_rgb(0_0_0/0.15)] transition active:translate-y-1 active:shadow-none"
         >
           🔁 もういっかい
         </Link>
         <Link
-          href="/"
+          href="/stages"
           className="rounded-full border-2 border-[var(--card-border)] bg-[var(--card)] px-10 py-4 text-2xl font-bold"
         >
-          🏠 ホームへ
+          🗺 ステージえらび
         </Link>
       </div>
       <p className="text-sm text-[var(--muted)]">

@@ -1,10 +1,18 @@
-/** 1かいぶんの結果（/play → /result の受け渡し） */
+import { useSyncExternalStore } from "react";
+import type { StageId } from "./words";
+
+/* ---------- /play → /result の受け渡し（sessionStorage） ---------- */
+
+/** 1かいぶんの結果 */
 export type LastResult = {
+  stage: StageId;
   correct: number;                   // 正しく打った文字数
   miss: number;                      // まちがえた回数
   seconds: number;                   // かかった時間（秒）
   missChars: Record<string, number>; // まちがえた文字と回数
   newRecord: boolean;                // さいこうきろくを こえたか
+  prevBest: number | null;           // この回の前の さいこうきろく
+  unlocked: StageId | null;          // この回で ひらいたステージ
 };
 
 const LAST_KEY = "typing-mori-last";
@@ -26,27 +34,100 @@ export function loadLast(): LastResult | null {
   }
 }
 
-/** さいこうきろく（はやさ・もじ/分）。localStorage のキー：typing-mori */
-type Data = { bestSpeed: number | null };
-const DATA_KEY = "typing-mori";
+/* ---------- ずっと残すデータ（localStorage のキー：typing-mori） ---------- */
 
-export function loadBest(): number | null {
+export type HistoryItem = {
+  at: string;   // 遊んだ日時（ISO 形式）
+  stage: StageId;
+  speed: number;
+  acc: number;
+  stars: 1 | 2 | 3;
+};
+
+export type Data = {
+  best: Partial<Record<StageId, number>>;      // ステージごとの さいこうきろく（もじ/分）
+  stars: Partial<Record<StageId, 1 | 2 | 3>>;  // ステージごとの いちばん多い ★
+  stickers: string[];                          // もらったシールの id
+  sound: boolean;                              // 効果音
+  history: HistoryItem[];                      // 練習の記録（新しい順、最大 100 件）
+};
+
+const DATA_KEY = "typing-mori";
+const CHANGE_EVENT = "typing-mori-change";
+const HISTORY_MAX = 100;
+
+export const EMPTY_DATA: Data = { best: {}, stars: {}, stickers: [], sound: true, history: [] };
+
+let cache: { raw: string | null; data: Data } | null = null;
+
+/** 保存データを読む（同じ中身なら同じオブジェクトを返す） */
+export function loadData(): Data {
+  let raw: string | null = null;
   try {
-    const d = JSON.parse(localStorage.getItem(DATA_KEY) ?? "{}") as Partial<Data>;
-    return typeof d.bestSpeed === "number" ? d.bestSpeed : null;
+    raw = localStorage.getItem(DATA_KEY);
   } catch {
-    return null;
+    return EMPTY_DATA;
   }
+  if (cache && cache.raw === raw) return cache.data;
+  let data = EMPTY_DATA;
+  try {
+    const d = raw ? (JSON.parse(raw) as Partial<Data> & { bestSpeed?: number }) : {};
+    data = { ...EMPTY_DATA, ...d };
+    // MVP のデータ（bestSpeed）は Lv2 の記録として引き継ぐ
+    if (typeof d.bestSpeed === "number" && data.best.lv2 === undefined) {
+      data = { ...data, best: { ...data.best, lv2: d.bestSpeed } };
+    }
+    delete (data as { bestSpeed?: number }).bestSpeed;
+  } catch {
+    data = EMPTY_DATA;
+  }
+  cache = { raw, data };
+  return data;
 }
 
-/** はやさが さいこうきろくを こえていたら保存して true を返す */
-export function updateBest(speed: number): boolean {
-  const best = loadBest();
-  if (best !== null && speed <= best) return false;
+export function saveData(data: Data) {
   try {
-    localStorage.setItem(DATA_KEY, JSON.stringify({ bestSpeed: speed } satisfies Data));
+    localStorage.setItem(DATA_KEY, JSON.stringify(data));
   } catch {
     // 保存できなくても遊びは続けられる
   }
-  return true;
+  window.dispatchEvent(new Event(CHANGE_EVENT));
+}
+
+export function clearData() {
+  try {
+    localStorage.removeItem(DATA_KEY);
+  } catch {
+    // 何もしない
+  }
+  window.dispatchEvent(new Event(CHANGE_EVENT));
+}
+
+function subscribe(onChange: () => void) {
+  window.addEventListener(CHANGE_EVENT, onChange);
+  window.addEventListener("storage", onChange); // ほかのタブで変わったとき
+  return () => {
+    window.removeEventListener(CHANGE_EVENT, onChange);
+    window.removeEventListener("storage", onChange);
+  };
+}
+
+/** 画面で保存データを使う（サーバーでの描画時は空のデータ） */
+export function useData(): Data {
+  return useSyncExternalStore(subscribe, loadData, () => EMPTY_DATA);
+}
+
+/** 1かい遊び終えたときに、記録・★・履歴を保存する */
+export function recordResult(item: Omit<HistoryItem, "at">): { newRecord: boolean; prevBest: number | null; data: Data } {
+  const before = loadData();
+  const prevBest = before.best[item.stage] ?? null;
+  const newRecord = prevBest === null || item.speed > prevBest;
+  const data: Data = {
+    ...before,
+    best: newRecord ? { ...before.best, [item.stage]: item.speed } : before.best,
+    stars: { ...before.stars, [item.stage]: Math.max(before.stars[item.stage] ?? 0, item.stars) as 1 | 2 | 3 },
+    history: [{ ...item, at: new Date().toISOString() }, ...before.history].slice(0, HISTORY_MAX),
+  };
+  saveData(data);
+  return { newRecord, prevBest, data };
 }
