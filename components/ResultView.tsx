@@ -80,6 +80,12 @@ export default function ResultView() {
           </p>
         </div>
       </div>
+      {!result.newRecord && result.prevBest !== null && (
+        <p className="rounded-2xl bg-[var(--card)] px-5 py-2 font-bold">
+          🏆 さいこうきろくは 1ぷんで {result.prevBest} もじ。あと{" "}
+          <span className="text-2xl text-[var(--accent)]">{result.prevBest - speed + 1}</span> もじで しんきろく！
+        </p>
+      )}
       <p className="text-sm text-[var(--muted)]">
         {Math.round(result.seconds)} びょうで {result.correct} もじ うったよ（まちがい {result.miss} かい）
       </p>
