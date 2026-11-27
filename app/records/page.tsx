@@ -3,7 +3,7 @@
 import Character from "@/components/Character";
 import SpeedChart from "@/components/SpeedChart";
 import { STAGES, isShown } from "@/lib/stages";
-import { useData } from "@/lib/storage";
+import { historyOf, useData } from "@/lib/storage";
 
 /** F-32 きろく（チャレンジ モードの 子ども向け。ひらがなの グラフ） */
 export default function RecordsPage() {
@@ -49,7 +49,7 @@ export default function RecordsPage() {
 
       <section className={card}>
         <h2 className="mb-3 text-xl font-bold">📈 はやさの グラフ</h2>
-        <SpeedChart history={data.history} kid />
+        <SpeedChart history={historyOf(data)} kid />
       </section>
     </div>
   );

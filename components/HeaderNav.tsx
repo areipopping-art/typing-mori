@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { courseOf } from "@/lib/courses";
 import { modeOf } from "@/lib/modes";
 import { saveData, useData } from "@/lib/storage";
 
@@ -13,7 +14,20 @@ export default function HeaderNav() {
 
   return (
     <nav className="flex flex-wrap items-center justify-end gap-1 text-lg font-bold">
-      {data.mode && (
+      {data.course && (
+        <button
+          type="button"
+          onClick={() => {
+            saveData({ ...data, course: null }); // ホームで えらびなおす
+            router.push("/");
+          }}
+          className="rounded-full border-2 border-[var(--card-border)] px-3 py-0.5 text-base"
+          title="コースを かえる"
+        >
+          {courseOf(data.course).emoji} {courseOf(data.course).name.replace(/（.*）/, "")}
+        </button>
+      )}
+      {data.course && data.mode && (
         <button
           type="button"
           onClick={() => {

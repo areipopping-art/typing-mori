@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import SpeedChart from "@/components/SpeedChart";
+import { courseOf } from "@/lib/courses";
 import { modeOf } from "@/lib/modes";
 import { stageOf } from "@/lib/stages";
 import { STICKERS } from "@/lib/stickers";
-import { clearData, saveData, useData } from "@/lib/storage";
+import { clearData, historyOf, saveData, useData } from "@/lib/storage";
 
 const dateFormat = new Intl.DateTimeFormat("ja-JP", {
   month: "numeric",
@@ -48,7 +49,10 @@ export default function ParentsPage() {
 
       <section className={card}>
         <h2 className="mb-3 text-xl font-bold">速さのグラフ</h2>
-        <SpeedChart history={data.history} />
+        <p className="mb-2 text-sm text-[var(--muted)]">
+          {courseOf(data.viewCourse).emoji} {courseOf(data.viewCourse).name}コースの記録です（コースごとに難しさが違うため分けて表示します）。
+        </p>
+        <SpeedChart history={historyOf(data)} />
       </section>
 
       <section className={card}>
@@ -69,6 +73,7 @@ export default function ParentsPage() {
                 <tr>
                   <th className="py-2 pr-3 font-normal">日時</th>
                   <th className="py-2 pr-3 font-normal">ステージ</th>
+                  <th className="py-2 pr-3 font-normal">コース</th>
                   <th className="py-2 pr-3 font-normal">モード</th>
                   <th className="py-2 pr-3 text-right font-normal">速さ（文字/分）</th>
                   <th className="py-2 pr-3 text-right font-normal">正確さ</th>
@@ -80,6 +85,7 @@ export default function ParentsPage() {
                   <tr key={h.at} className="border-t border-[var(--card-border)]">
                     <td className="py-2 pr-3 whitespace-nowrap">{dateFormat.format(new Date(h.at))}</td>
                     <td className="py-2 pr-3">{stageOf(h.stage).name}</td>
+                    <td className="py-2 pr-3 whitespace-nowrap">{courseOf(h.course ?? "kids").name.replace(/（.*）/, "")}</td>
                     <td className="py-2 pr-3 whitespace-nowrap">{h.mode ? modeOf(h.mode).short : "—"}</td>
                     <td className="py-2 pr-3 text-right font-bold">{h.speed}</td>
                     <td className="py-2 pr-3 text-right">{h.acc}%</td>
@@ -128,7 +134,7 @@ export default function ParentsPage() {
       <section className={card}>
         <h2 className="mb-1 text-xl font-bold">全データの削除</h2>
         <p className="mb-4 text-sm text-[var(--muted)]">
-          最高記録・★・シール・練習の記録をすべて消します。元に戻せません。
+          すべてのコースの最高記録・★・シール・練習の記録をすべて消します。元に戻せません。
         </p>
         <div className="flex flex-wrap items-center gap-3">
           <button

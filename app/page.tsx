@@ -5,8 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Character from "@/components/Character";
+import CourseChooser from "@/components/CourseChooser";
 import ModeChooser from "@/components/ModeChooser";
 import { CHARACTERS, characterOf } from "@/lib/characters";
+import { courseOf } from "@/lib/courses";
 import { modeOf } from "@/lib/modes";
 import { STAGES } from "@/lib/stages";
 import { saveData, useData } from "@/lib/storage";
@@ -22,16 +24,24 @@ export default function Home() {
   // Space キーでも あそべる
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.code === "Space" && !e.repeat && data.mode) {
+      if (e.code === "Space" && !e.repeat && data.mode && data.course) {
         e.preventDefault();
         router.push("/stages");
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [router, data.mode]);
+  }, [router, data.mode, data.course]);
 
-  // はじめて ひらいたとき（モードを まだ えらんでいない）は、モードえらびだけを出す
+  // いちばん最初は コースえらび → つぎに モードえらび
+  if (!data.course) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-8 text-center">
+        <Character mood="happy" message="ようこそ！ まずは コースを えらんでね" />
+        <CourseChooser />
+      </div>
+    );
+  }
   if (!data.mode) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-8 text-center">
@@ -95,6 +105,13 @@ export default function Home() {
         className="text-sm text-[var(--muted)] underline"
       >
         いまは {modeOf(data.mode).emoji} {modeOf(data.mode).name}（モードを かえる）
+      </button>
+      <button
+        type="button"
+        onClick={() => saveData({ ...data, course: null })}
+        className="-mt-8 text-sm text-[var(--muted)] underline"
+      >
+        {courseOf(data.course).emoji} {courseOf(data.course).name}コース（コースを かえる）
       </button>
       <Link
         href="/stages"
