@@ -29,6 +29,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <Link href="/stages" className="rounded-full px-3 py-1 hover:bg-[var(--background)]">
                 🗺 ステージ
               </Link>
+              <Link href="/stickers" className="rounded-full px-3 py-1 hover:bg-[var(--background)]">
+                📖 ずかん
+              </Link>
             </nav>
           </div>
         </header>

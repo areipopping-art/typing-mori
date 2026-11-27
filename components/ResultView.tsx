@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Character from "@/components/Character";
 import Confetti from "@/components/Confetti";
+import StickerModal from "@/components/StickerModal";
 import { accuracy, sortMissChars, speedPerMinute, stars } from "@/lib/score";
 import { stageOf } from "@/lib/stages";
 import { loadLast } from "@/lib/storage";
@@ -18,6 +19,7 @@ const STAR_MESSAGE = {
 export default function ResultView() {
   const router = useRouter();
   const [result] = useState(loadLast);
+  const [stickerOpen, setStickerOpen] = useState(() => (result?.newStickers?.length ?? 0) > 0);
 
   // 結果がない（直接このページを開いた）ときはホームへ
   useEffect(() => {
@@ -42,6 +44,7 @@ export default function ResultView() {
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-8 text-center">
+      {stickerOpen && <StickerModal ids={result.newStickers} onClose={() => setStickerOpen(false)} />}
       {result.newRecord && <Confetti />}
       {result.newRecord && (
         <p className="animate-bounce text-5xl font-extrabold text-[var(--sun)] [text-shadow:0_3px_0_rgb(0_0_0/0.15)]">

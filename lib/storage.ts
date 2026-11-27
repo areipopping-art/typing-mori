@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import { earnedStickers } from "./stickers";
 import type { StageId } from "./words";
 
 /* ---------- /play → /result の受け渡し（sessionStorage） ---------- */
@@ -13,6 +14,7 @@ export type LastResult = {
   newRecord: boolean;                // さいこうきろくを こえたか
   prevBest: number | null;           // この回の前の さいこうきろく
   unlocked: StageId | null;          // この回で ひらいたステージ
+  newStickers: string[];             // この回で もらった シール
 };
 
 const LAST_KEY = "typing-mori-last";
@@ -118,16 +120,23 @@ export function useData(): Data {
 }
 
 /** 1かい遊び終えたときに、記録・★・履歴を保存する */
-export function recordResult(item: Omit<HistoryItem, "at">): { newRecord: boolean; prevBest: number | null; data: Data } {
+export function recordResult(item: Omit<HistoryItem, "at">): {
+  newRecord: boolean;
+  prevBest: number | null;
+  newStickers: string[];
+  data: Data;
+} {
   const before = loadData();
   const prevBest = before.best[item.stage] ?? null;
   const newRecord = prevBest === null || item.speed > prevBest;
+  const newStickers = earnedStickers(item.stage, item.stars, before.stickers);
   const data: Data = {
     ...before,
+    stickers: [...before.stickers, ...newStickers],
     best: newRecord ? { ...before.best, [item.stage]: item.speed } : before.best,
     stars: { ...before.stars, [item.stage]: Math.max(before.stars[item.stage] ?? 0, item.stars) as 1 | 2 | 3 },
     history: [{ ...item, at: new Date().toISOString() }, ...before.history].slice(0, HISTORY_MAX),
   };
   saveData(data);
-  return { newRecord, prevBest, data };
+  return { newRecord, prevBest, newStickers, data };
 }
