@@ -30,6 +30,9 @@ const LISTS: Record<Exclude<StageId, "time">, string[]> = {
 /** 1かいに出すことばの数 */
 export const WORDS_PER_ROUND = 10;
 
+/** タイムアタックの制限時間（秒） */
+export const TIME_LIMIT = 60;
+
 function shuffle<T>(list: T[]): T[] {
   const a = [...list];
   for (let i = a.length - 1; i > 0; i--) {
@@ -44,7 +47,8 @@ function kanaFor(stage: StageId): string[] {
 }
 
 /** ステージのことばをランダムに選ぶ（同じことばは続けて出さない） */
-export function pickWords(stage: StageId, n = WORDS_PER_ROUND): Word[] {
+export function pickWords(stage: StageId): Word[] {
+  const n = stage === "time" ? Infinity : WORDS_PER_ROUND; // タイムアタックは全部をまぜて出す
   return shuffle(kanaFor(stage))
     .slice(0, n)
     .map((kana) => ({ kana, units: toUnits(kana) }));

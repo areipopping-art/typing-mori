@@ -3,12 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Character, { type Mood } from "@/components/Character";
-import { currentGuide, expectedChar, initGame, typeChar, type GameState } from "@/lib/game";
+import { currentGuide, expectedChar, initGame, timeUp, typeChar, type GameState } from "@/lib/game";
 import { keyToChar } from "@/lib/keys";
 import { accuracy, speedPerMinute, stars } from "@/lib/score";
 import { isUnlocked, nextStage } from "@/lib/stages";
 import { loadData, recordResult, saveLast } from "@/lib/storage";
-import { pickWords, type StageId } from "@/lib/words";
+import { pickWords, TIME_LIMIT, type StageId } from "@/lib/words";
 
 const PRAISE = ["いいね！", "すごい！", "じょうず！", "その ちょうし！"];
 
@@ -41,7 +41,7 @@ export default function Game({ stage }: { stage: StageId }) {
     if (!isUnlocked(stage, loadData())) router.replace("/stages");
   }, [stage, router]);
 
-  const [game, setGame] = useState(() => initGame(pickWords(stage)));
+  const [game, setGame] = useState(() => initGame(pickWords(stage), stage === "time" ? TIME_LIMIT : null));
   const gameRef = useRef(game);
   const [reaction, setReaction] = useState<{ mood: Mood; message: string }>({
     mood: "normal",
@@ -53,9 +53,21 @@ export default function Game({ stage }: { stage: StageId }) {
   const running = game.startedAt !== null && game.finishedAt === null;
   useEffect(() => {
     if (!running) return;
-    const id = setInterval(() => setNow(performance.now()), 100);
+    const id = setInterval(() => {
+      const t = performance.now();
+      setNow(t);
+      // タイムアタックの時間切れ
+      const g = gameRef.current;
+      if (g.timeLimit !== null && g.startedAt !== null && t - g.startedAt >= g.timeLimit * 1000) {
+        const ended = timeUp(g);
+        gameRef.current = ended;
+        setGame(ended);
+        setReaction({ mood: "happy", message: "タイムアップ！" });
+        finishRound(stage, ended);
+      }
+    }, 100);
     return () => clearInterval(id);
-  }, [running]);
+  }, [running, stage]);
 
   // ぜんぶ打ち終えたら、けっかページへ（「ぜんぶ うてたね！」を少し見せる）
   const finished = game.finishedAt !== null;
@@ -96,12 +108,22 @@ export default function Game({ stage }: { stage: StageId }) {
   const elapsed =
     game.startedAt === null ? 0 : ((game.finishedAt ?? Math.max(now, game.startedAt)) - game.startedAt) / 1000;
   const left = game.words.length - game.index - (done ? 1 : 0);
+  const timeLeft = game.timeLimit === null ? 0 : Math.max(0, Math.ceil(game.timeLimit - elapsed));
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-8">
       <div className="flex w-full max-w-2xl justify-between text-xl font-bold">
-        <span>⏱ {elapsed.toFixed(1)} びょう</span>
-        <span>のこり {left} こ</span>
+        {game.timeLimit === null ? (
+          <>
+            <span>⏱ {elapsed.toFixed(1)} びょう</span>
+            <span>のこり {left} こ</span>
+          </>
+        ) : (
+          <>
+            <span className={timeLeft <= 10 ? "text-[var(--ng)]" : ""}>⏱ のこり {timeLeft} びょう</span>
+            <span>うった ことば {game.done} こ</span>
+          </>
+        )}
       </div>
       <Character mood={reaction.mood} message={reaction.message} />
       <div className="w-full max-w-2xl rounded-3xl border-2 border-[var(--card-border)] bg-[var(--card)] px-6 py-10 text-center">
@@ -122,7 +144,9 @@ export default function Game({ stage }: { stage: StageId }) {
         </p>
       </div>
       {done ? (
-        <p className="text-2xl font-bold text-[var(--accent)]">ぜんぶ うてたね！</p>
+        <p className="text-2xl font-bold text-[var(--accent)]">
+          {game.timeLimit === null ? "ぜんぶ うてたね！" : "タイムアップ！"}
+        </p>
       ) : (
         game.startedAt === null && <p className="text-[var(--muted)]">さいしょの もじを うつと スタート！</p>
       )}

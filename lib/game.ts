@@ -12,15 +12,23 @@ export type GameState = {
   missChars: Record<string, number>; // まちがえた文字と回数（お手本の文字ごと）
   startedAt: number | null;          // 最初に正しく打った時刻（ms）
   finishedAt: number | null;         // 全部打ち終えた時刻（ms）
+  timeLimit: number | null;          // タイムアタックの制限時間（秒）。ふつうのステージは null
+  done: number;                      // 打ち終えた ことばの数
 };
 
 export type KeyResult = "correct" | "wrong" | "word-done" | "finished" | "ignored";
 
-export function initGame(words: Word[]): GameState {
+export function initGame(words: Word[], timeLimit: number | null = null): GameState {
   return {
     words, index: 0, match: startMatch(), wrong: false,
-    correct: 0, miss: 0, missChars: {}, startedAt: null, finishedAt: null,
+    correct: 0, miss: 0, missChars: {}, startedAt: null, finishedAt: null, timeLimit, done: 0,
   };
+}
+
+/** タイムアタックの時間切れ */
+export function timeUp(s: GameState): GameState {
+  if (s.finishedAt !== null || s.startedAt === null || s.timeLimit === null) return s;
+  return { ...s, finishedAt: s.startedAt + s.timeLimit * 1000 };
 }
 
 /** いまのことばのお手本（打った部分と、これから打つ部分） */
@@ -51,6 +59,11 @@ export function typeChar(s: GameState, ch: string, now: number): [GameState, Key
   if (!isDone(word.units, next)) return [ok, "correct"];
 
   // ことばを打ち終えた
-  if (s.index + 1 < s.words.length) return [{ ...ok, index: s.index + 1, match: startMatch() }, "word-done"];
-  return [{ ...ok, finishedAt: now }, "finished"];
+  const done = s.done + 1;
+  if (s.timeLimit !== null) {
+    // タイムアタックは時間切れまで続ける（ことばが なくなったら はじめから）
+    return [{ ...ok, done, index: (s.index + 1) % s.words.length, match: startMatch() }, "word-done"];
+  }
+  if (s.index + 1 < s.words.length) return [{ ...ok, done, index: s.index + 1, match: startMatch() }, "word-done"];
+  return [{ ...ok, done, finishedAt: now }, "finished"];
 }
