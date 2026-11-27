@@ -67,3 +67,15 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .confetti { display: none; }
 }
+
+/* ゆびガイドの色（左こゆび〜右こゆび） */
+:root {
+  --f1: #ffe0e6; --f2: #ffe9cc; --f3: #fff6bf; --f4: #e0f5d0;
+  --f5: #d4f1ef; --f6: #dbe8ff; --f7: #e8e0ff; --f8: #f8dff5;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --f1: #4a2a32; --f2: #4a3a24; --f3: #45421f; --f4: #2c4426;
+    --f5: #22413f; --f6: #283a55; --f7: #382f55; --f8: #4a2c47;
+  }
+}

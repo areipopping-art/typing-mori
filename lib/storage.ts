@@ -56,6 +56,7 @@ export type Data = {
   history: HistoryItem[];                      // 練習の記録（新しい順、最大 100 件）
   character: string;                           // えらんだ なかま（characters.ts の id）
   playDays: string[];                          // 遊んだ日（"2026-11-27"、古い順、最大 60 日）
+  fingerGuide: boolean;                        // ゆびガイド（キーの色分けと 指の名前）
 };
 
 const DATA_KEY = "typing-mori";
@@ -71,6 +72,7 @@ export const EMPTY_DATA: Data = {
   history: [],
   character: DEFAULT_CHARACTER,
   playDays: [],
+  fingerGuide: true,
 };
 
 let cache: { raw: string | null; data: Data } | null = null;

@@ -99,6 +99,21 @@ export default function ParentsPage() {
             onChange={(e) => saveData({ ...data, sound: e.target.checked })}
           />
         </label>
+        <label className="mt-4 flex items-center justify-between gap-4 border-t border-[var(--card-border)] pt-4">
+          <span>
+            指のガイド
+            <span className="block text-sm text-[var(--muted)]">
+              画面のキーボードを打つ指ごとに色分けし、次に使う指の名前を表示します
+            </span>
+          </span>
+          <input
+            type="checkbox"
+            role="switch"
+            className="h-6 w-6 accent-[var(--accent)]"
+            checked={data.fingerGuide}
+            onChange={(e) => saveData({ ...data, fingerGuide: e.target.checked })}
+          />
+        </label>
       </section>
 
       <section className={card}>
