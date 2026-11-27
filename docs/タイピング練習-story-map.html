@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>タイピングのもり ストーリーマップ</title>
+<style>
+  :root {
+    --bg: #f7f7f5; --surface: #ffffff; --text: #1f2328; --muted: #6b7280;
+    --border: #e3e3df; --backbone: #1f2328; --backbone-text: #ffffff;
+    --mvp-accent: #2f7d4f; --v1-accent: #2f5fa8; --v2-accent: #7a4ba6; --line: #9ca3af;
+    --pa: #d9480f; --pb: #0b7285; --pc: #6b7280;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #16181c; --surface: #1f2228; --text: #e6e7ea; --muted: #9aa0aa;
+      --border: #2e323a; --backbone: #e6e7ea; --backbone-text: #16181c;
+      --mvp-accent: #6fcf97; --v1-accent: #7fa8e8; --v2-accent: #c19be6; --line: #5b616b;
+      --pa: #ffa56b; --pb: #5fd3e6; --pc: #9aa0aa;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #16181c; --surface: #1f2228; --text: #e6e7ea; --muted: #9aa0aa;
+    --border: #2e323a; --backbone: #e6e7ea; --backbone-text: #16181c;
+    --mvp-accent: #6fcf97; --v1-accent: #7fa8e8; --v2-accent: #c19be6; --line: #5b616b;
+    --pa: #ffa56b; --pb: #5fd3e6; --pc: #9aa0aa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+    line-height: 1.6;
+  }
+  main { max-width: 1280px; margin: 0 auto; padding: 32px 16px 48px; }
+  h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  h2 { font-size: 1.05rem; margin: 32px 0 12px; }
+  .lead { color: var(--muted); margin: 0 0 8px; font-size: .95rem; }
+
+  .personas { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .persona {
+    background: var(--surface); border: 1px solid var(--border); border-top: 4px solid var(--pc-color);
+    border-radius: 10px; padding: 14px 16px;
+  }
+  .persona h3 { margin: 0 0 4px; font-size: 1rem; color: var(--pc-color); }
+  .persona p { margin: 0; font-size: .85rem; color: var(--muted); }
+  .persona ul { margin: 8px 0 0; padding-left: 18px; font-size: .85rem; }
+  .persona.a { --pc-color: var(--pa); }
+  .persona.b { --pc-color: var(--pb); }
+
+  .filter { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 16px; align-items: center; font-size: .85rem; color: var(--muted); }
+  .filter button {
+    font: inherit; font-size: .82rem; padding: 4px 12px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--border); background: var(--surface); color: var(--text);
+  }
+  .filter button[aria-pressed="true"] { background: var(--backbone); color: var(--backbone-text); border-color: var(--backbone); }
+
+  .map-wrap { overflow-x: auto; padding-bottom: 8px; }
+  .map { display: grid; grid-template-columns: 72px repeat(5, minmax(190px, 1fr)); gap: 12px; min-width: 1060px; }
+  .axis-label { font-size: .75rem; color: var(--muted); align-self: center; }
+  .step {
+    background: var(--backbone); color: var(--backbone-text);
+    border-radius: 10px; padding: 12px 10px; text-align: center; font-weight: 700; position: relative;
+  }
+  .step small { display: block; font-weight: 400; opacity: .75; font-size: .72rem; }
+  .step .n { display: block; font-size: .68rem; font-weight: 400; opacity: .6; }
+  .step:not(:last-child)::after {
+    content: "→"; position: absolute; right: -11px; top: 50%;
+    transform: translateY(-50%); color: var(--muted); font-weight: 400;
+  }
+  .release { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; margin-top: 10px; font-size: .8rem; font-weight: 700; }
+  .release::after { content: ""; flex: 1; border-top: 2px dashed var(--line); }
+  .release.mvp { color: var(--mvp-accent); }
+  .release.v1 { color: var(--v1-accent); }
+  .release.v2 { color: var(--v2-accent); }
+  .row-label { font-weight: 700; font-size: .85rem; padding-top: 8px; color: var(--accent); }
+  .cell { display: flex; flex-direction: column; gap: 8px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-left: 4px solid var(--accent); border-radius: 8px; padding: 8px 12px 10px; font-size: .86rem;
+    transition: opacity .15s;
+  }
+  .card .meta { display: flex; gap: 6px; align-items: center; margin-bottom: 2px; }
+  .card .p { font-size: .7rem; color: var(--muted); }
+  .tag { font-size: .66rem; font-weight: 700; padding: 0 6px; border-radius: 4px; border: 1px solid currentColor; }
+  .tag.a { color: var(--pa); }
+  .tag.b { color: var(--pb); }
+  .tag.c { color: var(--pc); }
+  .card .ext { font-size: .7rem; color: var(--v2-accent); }
+  .mvp-row { --accent: var(--mvp-accent); }
+  .v1-row  { --accent: var(--v1-accent); }
+  .v2-row  { --accent: var(--v2-accent); }
+  .map.only-a .card:not([data-p~="a"]):not([data-p~="c"]),
+  .map.only-b .card:not([data-p~="b"]):not([data-p~="c"]) { opacity: .2; }
+
+  .infra {
+    background: var(--surface); border: 1px dashed var(--line); border-radius: 10px; padding: 12px 16px;
+    font-size: .88rem;
+  }
+  .infra ul { margin: 4px 0 0; padding-left: 18px; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px; font-size: .82rem; color: var(--muted); }
+  .legend .sw::before {
+    content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; background: var(--c);
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>タイピングのもり ユーザーストーリーマップ</h1>
+  <p class="lead">子ども向けのタイピング練習ゲームです。横軸＝子どもがしたいこと（時系列の行動フロー）／縦軸＝そのために必要な機能（上ほど優先度が高い）。MVP は目安の 1時間で作れる範囲です。</p>
+
+  <h2>ペルソナ</h2>
+  <div class="personas">
+    <div class="persona a">
+      <h3>A：はじめてキーボードをさわる子</h3>
+      <p>小学1〜3年生。ローマ字はまだあやふや。キーを1つずつ探して打つ。</p>
+      <ul>
+        <li>むずかしいと、すぐにあきてしまう</li>
+        <li>キャラクターがほめてくれる・音が鳴るのがうれしい</li>
+        <li>まちがえても怒られない雰囲気がほしい</li>
+      </ul>
+    </div>
+    <div class="persona b">
+      <h3>B：ローマ字を習って、はやく打ちたい子</h3>
+      <p>小学3〜6年生。学校のタブレットやパソコンで打ったことがある。</p>
+      <ul>
+        <li>「しんきろく！」が出るとうれしい、友だちと速さを比べたい</li>
+        <li>レベルが上がる・ごほうびが集まると続けたくなる</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>ストーリーマップ</h2>
+  <div class="filter" role="group" aria-label="ペルソナで絞り込み">
+    表示：
+    <button type="button" data-f="all" aria-pressed="true">すべて</button>
+    <button type="button" data-f="a" aria-pressed="false">A 向けを強調</button>
+    <button type="button" data-f="b" aria-pressed="false">B 向けを強調</button>
+  </div>
+
+  <div class="map-wrap">
+    <div class="map" id="map">
+      <div class="axis-label">したいこと →</div>
+      <div class="step"><span class="n">1</span>あそびをはじめる<small>すぐにあそびたい</small></div>
+      <div class="step"><span class="n">2</span>ことばをうつ<small>見ながら正しくうちたい</small></div>
+      <div class="step"><span class="n">3</span>けっかをみる<small>どれくらいできたか知りたい</small></div>
+      <div class="step"><span class="n">4</span>ごほうびをあつめる<small>がんばったしるしがほしい</small></div>
+      <div class="step"><span class="n">5</span>もっとうまくなる<small>つぎのレベルにいきたい</small></div>
+
+      <!-- MVP -->
+      <div class="release mvp">MVP（1時間：ことばをうって、はやさ・せいかくさ・さいこうきろくが分かる）</div>
+      <div class="row-label mvp-row">MVP</div>
+      <div class="cell mvp-row">
+        <div class="card" data-p="c"><div class="meta"><span class="p">P1</span><span class="tag c">共通</span></div>大きな「あそぶ」ボタン（Space キーでも開始）</div>
+        <div class="card" data-p="c"><div class="meta"><span class="p">P2</span><span class="tag c">共通</span></div>キャラクターがあいさつ</div>
+      </div>
+      <div class="cell mvp-row">
+        <div class="card" data-p="c"><div class="meta"><span class="p">P1</span><span class="tag c">共通</span></div>ひらがなのことば＋ローマ字のお手本を表示（1回 10 こ）</div>
+        <div class="card" data-p="c"><div class="meta"><span class="p">P1</span><span class="tag c">共通</span></div>キー入力を1文字ずつ判定。合っていたら緑、まちがえたら赤</div>
+        <div class="card" data-p="a"><div class="meta"><span class="p">P2</span><span class="tag a">A</span></div>まちがえても先に進まず、正しいキーを打つまで待つ（Backspace 不要）</div>
+        <div class="card" data-p="c"><div class="meta"><span class="p">P2</span><span class="tag c">共通</span></div>タイマーと「のこり ◯こ」を表示</div>
+        <div class="card" data-p="a"><div class="meta"><span class="p">P3</span><span class="tag a">A</span></div>キャラクターが反応（正解でニコッ、ミスでびっくり）</div>
+      </div>
+      <div class="cell mvp-row">
+        <div class="card" data-p="c"><div class="meta"><span class="p">P1</span><span class="tag c">共通</span></div>はやさ（1ぷんで ◯もじ）とせいかくさ（◯%）</div>
+        <div class="card" data-p="a"><div class="meta"><span class="p">P1</span><span class="tag a">A</span></div>ほし ★1〜3 で評価（数字が分からなくても分かる）</div>
+        <div class="card" data-p="b"><div class="meta"><span class="p">P2</span><span class="tag b">B</span></div>記録をこえたら「しんきろく！」＋紙ふぶき</div>
+        <div class="card" data-p="c"><div class="meta"><span class="p">P3</span><span class="tag c">共通</span></div>「もういっかい」ボタン（Enter でも可）</div>
+      </div>
+      <div class="cell mvp-row">
+        <div class="card" data-p="c"><div class="meta"><span class="p">P1</span><span class="tag c">共通</span></div>さいこうきろくを保存して、ホームに表示</div>
+      </div>
+      <div class="cell mvp-row">
+        <div class="card" data-p="a"><div class="meta"><span class="p">P1</span><span class="tag a">A</span></div>けっか画面で「まちがえやすかった もじ」を表示</div>
+      </div>
+
+      <!-- v1.0 -->
+      <div class="release v1">v1.0（あそびの楽しさ＋上達の見える化）</div>
+      <div class="row-label v1-row">v1.0</div>
+      <div class="cell v1-row">
+        <div class="card" data-p="c"><div class="meta"><span class="p">P1</span><span class="tag c">共通</span></div>ステージをえらぶ（Lv1 あいうえお → Lv2 みじかいことば → Lv3 ながいことば）</div>
+        <div class="card" data-p="b"><div class="meta"><span class="p">P2</span><span class="tag b">B</span></div>タイムアタック（60びょうで何こうてるか）</div>
+      </div>
+      <div class="cell v1-row">
+        <div class="card" data-p="a"><div class="meta"><span class="p">P1</span><span class="tag a">A</span></div>画面にキーボードを表示し、つぎのキーを光らせる</div>
+        <div class="card" data-p="c"><div class="meta"><span class="p">P2</span><span class="tag c">共通</span></div>効果音（ピコッ・ブブー・ファンファーレ）</div>
+        <div class="card" data-p="b"><div class="meta"><span class="p">P3</span><span class="tag b">B</span></div>いろいろなローマ字を正解にする（shi / si、tsu / tu など）</div>
+      </div>
+      <div class="cell v1-row">
+        <div class="card" data-p="b"><div class="meta"><span class="p">P1</span><span class="tag b">B</span></div>さいこうきろくとの差（あと ◯もじ！）</div>
+        <div class="card" data-p="b"><div class="meta"><span class="p">P2</span><span class="tag b">B</span></div>ステージごとのさいこうきろく</div>
+      </div>
+      <div class="cell v1-row">
+        <div class="card" data-p="c"><div class="meta"><span class="p">P1</span><span class="tag c">共通</span></div>★の数でシールがもらえる・ずかんで集める</div>
+        <div class="card" data-p="a"><div class="meta"><span class="p">P2</span><span class="tag a">A</span></div>シールゲットの演出</div>
+      </div>
+      <div class="cell v1-row">
+        <div class="card" data-p="b"><div class="meta"><span class="p">P1</span><span class="tag b">B</span></div>★3 で次のステージがひらく</div>
+        <div class="card" data-p="c"><div class="meta"><span class="p">P2</span><span class="tag c">共通</span></div>おうちのひと向けページ（記録の確認・音のオン/オフ・全データ削除）</div>
+      </div>
+
+      <!-- v2.0 -->
+      <div class="release v2">v2.0（もっと楽しく・もっと続く）</div>
+      <div class="row-label v2-row">v2.0</div>
+      <div class="cell v2-row">
+        <div class="card" data-p="c"><div class="meta"><span class="p">P1</span><span class="tag c">共通</span></div>キャラクターをえらぶ</div>
+        <div class="card" data-p="b"><div class="meta"><span class="p">P2</span><span class="tag b">B</span></div>えいたんごモード</div>
+      </div>
+      <div class="cell v2-row">
+        <div class="card" data-p="a"><div class="meta"><span class="p">P1</span><span class="tag a">A</span></div>ゆびの色分けガイド（どの指で打つか）</div>
+      </div>
+      <div class="cell v2-row">
+        <div class="card" data-p="b"><div class="meta"><span class="p">P1</span><span class="tag b">B</span></div>はやさのグラフ（せいちょうきろく）</div>
+      </div>
+      <div class="cell v2-row">
+        <div class="card" data-p="a"><div class="meta"><span class="p">P1</span><span class="tag a">A</span></div>まいにちスタンプカード（れんぞく日数）</div>
+        <div class="card" data-p="b"><div class="meta"><span class="p">P2</span><span class="tag b">B</span></div>みんなのランキング<div class="ext">※ サーバー・DB・子どもの個人情報の配慮が必要</div></div>
+      </div>
+      <div class="cell v2-row">
+        <div class="card" data-p="a"><div class="meta"><span class="p">P1</span><span class="tag a">A</span></div>にがてな もじ だけを集めた とっくんステージ</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span class="sw" style="--c: var(--mvp-accent)">MVP</span>
+    <span class="sw" style="--c: var(--v1-accent)">v1.0</span>
+    <span class="sw" style="--c: var(--v2-accent)">v2.0</span>
+    <span><span class="tag a">A</span> はじめてキーボードをさわる子向け</span>
+    <span><span class="tag b">B</span> はやく打ちたい子向け</span>
+    <span><span class="tag c">共通</span> 両方に必要</span>
+    <span>P1〜P3 = 同じリリース内の優先度</span>
+  </div>
+
+  <h2>共通の仕組み（どの行動にも関わるもの）</h2>
+  <div class="infra">
+    <ul>
+      <li>キーボード入力の処理（keydown イベント）：Shift・Tab など文字以外のキーは無視。日本語入力（IME）がオンでも判定できるよう <code>e.key</code> ではなく <code>e.code</code> も確認する</li>
+      <li>子ども向けの見た目：大きな文字・ひらがな中心（漢字は使わない）・明るい色・やさしいことば（「ざんねん」ではなく「おしい！」）</li>
+      <li>ブラウザに自動保存（localStorage）：さいこうきろくが閉じても消えない。名前などの個人情報は入力させない</li>
+      <li>PC・タブレット＋物理キーボードで使う前提</li>
+    </ul>
+  </div>
+</main>
+<script>
+  (function () {
+    var map = document.getElementById('map');
+    var buttons = document.querySelectorAll('.filter button');
+    buttons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var f = btn.getAttribute('data-f');
+        map.classList.remove('only-a', 'only-b');
+        if (f !== 'all') map.classList.add('only-' + f);
+        buttons.forEach(function (b) { b.setAttribute('aria-pressed', String(b === btn)); });
+      });
+    });
+  })();
+</script>
+</body>
+</html>

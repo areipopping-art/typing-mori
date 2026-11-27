@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>タイピングのもり サイトマップ</title>
+<style>
+  :root {
+    --bg: #f7f7f5; --surface: #ffffff; --text: #1f2328; --muted: #6b7280;
+    --border: #e3e3df; --line: #b8bcc4; --root: #1f2328; --root-text: #ffffff;
+    --mvp: #2f7d4f; --v1: #2f5fa8; --v2: #7a4ba6; --ok: #2f7d4f;
+    --pa: #d9480f; --pb: #0b7285; --pc: #6b7280;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #16181c; --surface: #1f2228; --text: #e6e7ea; --muted: #9aa0aa;
+      --border: #2e323a; --line: #4a4f58; --root: #e6e7ea; --root-text: #16181c;
+      --mvp: #6fcf97; --v1: #7fa8e8; --v2: #c19be6; --ok: #6fcf97;
+      --pa: #ffa56b; --pb: #5fd3e6; --pc: #9aa0aa;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #16181c; --surface: #1f2228; --text: #e6e7ea; --muted: #9aa0aa;
+    --border: #2e323a; --line: #4a4f58; --root: #e6e7ea; --root-text: #16181c;
+    --mvp: #6fcf97; --v1: #7fa8e8; --v2: #c19be6; --ok: #6fcf97;
+    --pa: #ffa56b; --pb: #5fd3e6; --pc: #9aa0aa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+    line-height: 1.6;
+  }
+  main { max-width: 960px; margin: 0 auto; padding: 32px 16px 48px; }
+  h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  h2 { font-size: 1.1rem; margin: 40px 0 12px; }
+  .lead { color: var(--muted); margin: 0 0 8px; font-size: .95rem; }
+  .muted { color: var(--muted); font-size: .85rem; }
+
+  .badge { display: inline-block; font-size: .68rem; font-weight: 700; padding: 0 7px; border-radius: 4px; color: var(--surface); background: var(--c); vertical-align: 1px; }
+  .b-mvp { --c: var(--mvp); } .b-v1 { --c: var(--v1); } .b-v2 { --c: var(--v2); }
+  .tag { font-size: .66rem; font-weight: 700; padding: 0 6px; border-radius: 4px; border: 1px solid currentColor; white-space: nowrap; }
+  .tag.a { color: var(--pa); } .tag.b { color: var(--pb); } .tag.c { color: var(--pc); }
+
+  .nav-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; }
+  .nav-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .nav-box .label { font-size: .75rem; color: var(--muted); margin-bottom: 8px; }
+  .headerbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: .8rem; flex-wrap: wrap; }
+  .headerbar span + span { margin-left: 10px; }
+
+  ul.tree, ul.tree ul { list-style: none; margin: 0; padding: 0; }
+  ul.tree ul { margin-left: 22px; padding-left: 22px; border-left: 2px solid var(--line); }
+  ul.tree li { position: relative; padding: 6px 0; }
+  ul.tree ul > li::before { content: ""; position: absolute; left: -22px; top: 28px; width: 18px; border-top: 2px solid var(--line); }
+  ul.tree ul > li:last-child::after { content: ""; position: absolute; left: -24px; top: 30px; bottom: 0; border-left: 2px solid var(--bg); }
+  .node {
+    display: inline-flex; flex-direction: column; gap: 2px; max-width: 100%;
+    background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--c, var(--line));
+    border-radius: 8px; padding: 8px 14px; min-width: 240px;
+  }
+  .node .top { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .node b { font-size: .95rem; }
+  .node .path { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .75rem; color: var(--muted); }
+  .node .desc { font-size: .8rem; color: var(--muted); }
+  .root > .node { background: var(--root); color: var(--root-text); border-color: var(--root); border-left-color: var(--mvp); }
+  .root > .node .path, .root > .node .desc { color: var(--root-text); opacity: .75; }
+
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; min-width: 820px; font-size: .84rem; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-size: .75rem; color: var(--muted); font-weight: 600; background: var(--bg); position: sticky; top: 0; }
+  tr:last-child td { border-bottom: none; }
+  td code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .78rem; }
+  td ul { margin: 0; padding-left: 16px; }
+  td .ph { display: block; margin-top: 2px; }
+  .id { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--muted); white-space: nowrap; }
+
+  .checks { display: grid; gap: 8px; }
+  .check { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; display: grid; grid-template-columns: 24px 1fr; gap: 4px 8px; }
+  .check .mark { color: var(--ok); font-weight: 700; }
+  .check b { font-size: .9rem; }
+  .check p { grid-column: 2; margin: 0; font-size: .82rem; color: var(--muted); }
+
+  .summary { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0 0; }
+  .summary div { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: .85rem; }
+  .summary b { font-size: 1.1rem; }
+
+  .note { margin-top: 28px; font-size: .85rem; color: var(--muted); }
+  .note a { color: inherit; }
+</style>
+</head>
+<body>
+<main>
+  <h1>タイピングのもり サイトマップ・ページ一覧</h1>
+  <p class="lead">ストーリーマップの5つの行動（あそびをはじめる → ことばをうつ → けっかをみる → ごほうびをあつめる → もっとうまくなる）を、ページに落とし込んだものです。画面の文字は子どもが読めるよう、ひらがな中心にします。</p>
+  <div class="summary">
+    <div><span class="badge b-mvp">MVP</span> <b>3</b> ページ ＋ 共通部品</div>
+    <div><span class="badge b-v1">v1.0</span> <b>+3</b> ページ ＋ モーダル1</div>
+    <div><span class="badge b-v2">v2.0</span> ページ追加なし（既存ページを拡張）</div>
+    <div><span class="badge b-v2">追加</span> <b>+1</b> ページ（モード別：F-29〜F-32）</div>
+  </div>
+
+  <h2>全ページ共通ナビゲーション</h2>
+  <div class="nav-grid">
+    <div class="nav-box">
+      <div class="label">ヘッダー（大きなアイコン＋ひらがな）</div>
+      <div class="headerbar">
+        <b>🌳 タイピングのもり</b>
+        <div><span>🗺 ステージ <span class="badge b-v1">v1.0</span></span><span>📖 ずかん <span class="badge b-v1">v1.0</span></span></div>
+      </div>
+      <p class="muted" style="margin:8px 0 0">左のロゴでホームへ。MVP ではロゴだけ。おうちのひと向けページはフッターの小さいリンク（子どもが迷い込まない位置）。</p>
+    </div>
+    <div class="nav-box">
+      <div class="label">キーボード操作（マウスなしで遊べる）</div>
+      <p class="muted" style="margin:0">ホーム：<b>Space</b> であそぶ<br>あそび中：<b>Esc</b> でやめる <span class="badge b-v1">v1.0</span><br>けっか：<b>Enter</b> でもういっかい</p>
+      <p class="muted" style="margin:8px 0 0">あそび中はヘッダーを隠し、ことばとキャラクターだけにして集中できるようにする。</p>
+    </div>
+  </div>
+
+  <h2>サイトマップ（最大2層）</h2>
+  <ul class="tree">
+    <li class="root">
+      <div class="node">
+        <div class="top"><b>ホーム（もりの入口）</b><span class="badge b-mvp">MVP</span></div>
+        <span class="path">/</span>
+        <span class="desc">キャラクターのあいさつ、さいこうきろく、大きな「あそぶ」ボタン</span>
+      </div>
+      <ul>
+        <li>
+          <div class="node" style="--c: var(--mvp)">
+            <div class="top"><b>あそぶ</b><span class="badge b-mvp">MVP</span></div>
+            <span class="path">/play</span>
+            <span class="desc">ことばを1文字ずつ判定。合うと緑、まちがいは赤。タイマーとキャラの反応</span>
+          </div>
+          <ul>
+            <li>
+              <div class="node" style="--c: var(--mvp)">
+                <div class="top"><b>けっか</b><span class="badge b-mvp">MVP</span></div>
+                <span class="path">/result</span>
+                <span class="desc">★1〜3、はやさ・せいかくさ、しんきろく！、まちがえやすかった もじ</span>
+              </div>
+              <ul>
+                <li>
+                  <div class="node" style="--c: var(--v1); border-style: dashed; border-left-style: solid;">
+                    <div class="top"><b>シールゲット！</b><span class="badge b-v1">v1.0</span></div>
+                    <span class="path">（モーダル：ページではない）</span>
+                    <span class="desc">★の数に応じて新しいシールをもらう演出</span>
+                  </div>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <div class="node" style="--c: var(--v1)">
+            <div class="top"><b>ステージえらび</b><span class="badge b-v1">v1.0</span></div>
+            <span class="path">/stages</span>
+            <span class="desc">Lv1〜3 とタイムアタック。★3 で次がひらく。ステージごとのきろく</span>
+          </div>
+        </li>
+        <li>
+          <div class="node" style="--c: var(--v1)">
+            <div class="top"><b>ずかん</b><span class="badge b-v1">v1.0</span></div>
+            <span class="path">/stickers</span>
+            <span class="desc">あつめたシールの一覧（まだのものはシルエット）</span>
+          </div>
+        </li>
+        <li>
+          <div class="node" style="--c: var(--v2)">
+            <div class="top"><b>きろく</b><span class="badge b-v2">追加</span><span class="tag b">B</span></div>
+            <span class="path">/records</span>
+            <span class="desc">チャレンジ モードのときだけヘッダーに出す。最高記録・★・はやさのグラフ</span>
+          </div>
+        </li>
+        <li>
+          <div class="node" style="--c: var(--v1)">
+            <div class="top"><b>おうちの方へ</b><span class="badge b-v1">v1.0</span></div>
+            <span class="path">/parents</span>
+            <span class="desc">練習の記録、音のオン/オフ、全データの削除（v2.0 ではやさのグラフ）</span>
+          </div>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <p class="muted">※ v2.0 の「とっくんステージ」は <code>/play?stage=weak</code>、「えいたんごモード」は <code>/play?stage=english</code> として、あそぶページを使い回します。M-01 のモーダルは 3層目に見えますが、ページではないので階層には数えません。<br>
+  ※ いちばん最初に コース（🧒 子ども／🎒 学生（中学・高校）／💼 社会人）を選びます。コースで 背景（森・教室・会社の社内）、問題の難しさ、画面の言葉、アプリ名が変わります（F-33〜F-36）。<br>
+  ※ モード（🌱 はじめて＝A／🔥 チャレンジ＝B）は、はじめて開いたときにホームで選び、ヘッダーのバッジから選びなおせます。モードによって ★の基準・あそぶ画面・ステージの数・「きろく」ページの有無が変わります。</p>
+
+  <h2>ページ一覧</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>ID</th><th>ページ名</th><th>URL</th><th>役割</th><th>主な機能（Phase）</th><th>対応する行動</th><th>ペルソナ</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="id">P-01</td>
+          <td><b>ホーム</b><span class="ph badge b-mvp">MVP</span></td>
+          <td><code>/</code></td>
+          <td>すぐにあそびはじめる</td>
+          <td><ul>
+            <li>「あそぶ」ボタン・Space で開始（MVP）</li>
+            <li>キャラクターのあいさつ（MVP）</li>
+            <li>さいこうきろくの表示（MVP）</li>
+            <li>キャラクターをえらぶ・スタンプカード（v2.0）</li>
+          </ul></td>
+          <td>1 あそびをはじめる</td>
+          <td><span class="tag c">共通</span></td>
+        </tr>
+        <tr>
+          <td class="id">P-02</td>
+          <td><b>あそぶ</b><span class="ph badge b-mvp">MVP</span></td>
+          <td><code>/play</code></td>
+          <td>ことばをうつ</td>
+          <td><ul>
+            <li>ひらがな＋ローマ字のお手本、1回10こ（MVP）</li>
+            <li>1文字ずつ判定・緑／赤の表示（MVP）</li>
+            <li>まちがえたら正しいキーまで待つ（MVP）</li>
+            <li>タイマー・のこり数・キャラの反応（MVP）</li>
+            <li>画面キーボード・効果音・ローマ字のゆれ対応・Esc（v1.0）</li>
+            <li>ゆびガイド・とっくん・えいたんご（v2.0）</li>
+          </ul></td>
+          <td>2 ことばをうつ<br>5 もっとうまくなる</td>
+          <td><span class="tag c">共通</span></td>
+        </tr>
+        <tr>
+          <td class="id">P-03</td>
+          <td><b>けっか</b><span class="ph badge b-mvp">MVP</span></td>
+          <td><code>/result</code></td>
+          <td>どれくらいできたか知る</td>
+          <td><ul>
+            <li>★1〜3（MVP）</li>
+            <li>はやさ（1ぷんで◯もじ）・せいかくさ（◯%）（MVP）</li>
+            <li>しんきろく！＋紙ふぶき（MVP）</li>
+            <li>まちがえやすかった もじ（MVP）</li>
+            <li>もういっかい・ホームへ（MVP）</li>
+            <li>さいこうきろくとの差（v1.0）</li>
+          </ul></td>
+          <td>3 けっかをみる</td>
+          <td><span class="tag c">共通</span></td>
+        </tr>
+        <tr>
+          <td class="id">P-04</td>
+          <td><b>ステージえらび</b><span class="ph badge b-v1">v1.0</span></td>
+          <td><code>/stages</code></td>
+          <td>レベルを上げていく</td>
+          <td><ul>
+            <li>Lv1〜3・タイムアタック（v1.0）</li>
+            <li>★3 で次がひらく（v1.0）</li>
+            <li>ステージごとのさいこうきろく（v1.0）</li>
+          </ul></td>
+          <td>1 あそびをはじめる<br>5 もっとうまくなる</td>
+          <td><span class="tag a">A</span> <span class="tag b">B</span></td>
+        </tr>
+        <tr>
+          <td class="id">P-05</td>
+          <td><b>ずかん</b><span class="ph badge b-v1">v1.0</span></td>
+          <td><code>/stickers</code></td>
+          <td>がんばりを集めて眺める</td>
+          <td><ul>
+            <li>シールの一覧・まだのものはシルエット（v1.0）</li>
+          </ul></td>
+          <td>4 ごほうびをあつめる</td>
+          <td><span class="tag c">共通</span></td>
+        </tr>
+        <tr>
+          <td class="id">P-06</td>
+          <td><b>おうちのひとへ</b><span class="ph badge b-v1">v1.0</span></td>
+          <td><code>/parents</code></td>
+          <td>保護者が様子を見る・管理する</td>
+          <td><ul>
+            <li>練習の記録一覧（v1.0）</li>
+            <li>音のオン/オフ・全データの削除（v1.0）</li>
+            <li>はやさのグラフ（v2.0）</li>
+          </ul></td>
+          <td>（共通の仕組み）</td>
+          <td class="muted">保護者</td>
+        </tr>
+        <tr>
+          <td class="id">P-07</td>
+          <td><b>きろく</b><span class="ph badge b-v2">追加</span></td>
+          <td><code>/records</code></td>
+          <td>自分の伸びを見る（子ども向け）</td>
+          <td><ul>
+            <li>ステージ別の最高記録・★</li>
+            <li>はやさのグラフ（ひらがな）</li>
+          </ul></td>
+          <td>4 ごほうびをあつめる<br>5 もっとうまくなる</td>
+          <td><span class="tag b">B</span></td>
+        </tr>
+        <tr>
+          <td class="id">M-01</td>
+          <td><b>シールゲット！</b><span class="ph badge b-v1">v1.0</span></td>
+          <td class="muted">モーダル</td>
+          <td>ごほうびの瞬間を盛り上げる</td>
+          <td><ul><li>シールの獲得演出（v1.0）</li></ul></td>
+          <td>4 ごほうびをあつめる</td>
+          <td><span class="tag a">A</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="muted">※「みんなのランキング」（v2.0・サーバーとデータベース、子どもの個人情報への配慮が必要）は今回のページ構成には含めていません。</p>
+
+  <h2>設計チェック</h2>
+  <div class="checks">
+    <div class="check"><span class="mark">✓</span><b>階層が3層以内</b><p>最も深いのは「ホーム → あそぶ → けっか」の2層。</p></div>
+    <div class="check"><span class="mark">✓</span><b>重要な機能が2クリック以内</b><p>あそぶはホームで Space キー1回（0クリック）。けっかは打ち終わると自動で表示。ステージ・ずかんはヘッダーから1クリック。</p></div>
+    <div class="check"><span class="mark">✓</span><b>ナビゲーションの一貫性</b><p>全ページ同じヘッダー。開始・中断・もういっかいがすべてキーボードで操作できる。</p></div>
+    <div class="check"><span class="mark">✓</span><b>メンタルモデルに沿った構造</b><p>子ども向けゲームで一般的な「スタート → あそぶ → けっか → もういっかい」の流れ。保護者向けの管理機能は子どもの動線から外している。</p></div>
+  </div>
+
+  <p class="note">関連資料：<a href="タイピング練習-story-map.html">ユーザーストーリーマップ</a> / <a href="タイピング練習-要件定義書.md">要件定義書</a></p>
+</main>
+</body>
+</html>
