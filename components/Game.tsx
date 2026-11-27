@@ -85,6 +85,10 @@ export default function Game({ stage }: { stage: StageId }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.code === "Space") e.preventDefault(); // 画面がスクロールしないように
+      if (e.key === "Escape") {
+        router.push("/"); // とちゅうで やめる（記録は のこさない）
+        return;
+      }
       const ch = keyToChar(e);
       if (!ch) return;
       const before = gameRef.current;
@@ -111,7 +115,7 @@ export default function Game({ stage }: { stage: StageId }) {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [stage]);
+  }, [stage, router]);
 
   const word = game.words[game.index];
   const g = currentGuide(game);
@@ -160,7 +164,10 @@ export default function Game({ stage }: { stage: StageId }) {
           {game.timeLimit === null ? "ぜんぶ うてたね！" : "タイムアップ！"}
         </p>
       ) : (
-        game.startedAt === null && <p className="text-[var(--muted)]">さいしょの もじを うつと スタート！</p>
+        <p className="text-sm text-[var(--muted)]">
+          {game.startedAt === null && "さいしょの もじを うつと スタート！ ／ "}
+          <kbd className="rounded border border-[var(--card-border)] bg-[var(--card)] px-2 py-0.5">Esc</kbd> で やめる
+        </p>
       )}
     </div>
   );
