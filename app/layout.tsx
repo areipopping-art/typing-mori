@@ -36,6 +36,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </div>
         </header>
         <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-8">{children}</main>
+        <footer className="py-4 text-center text-xs text-[var(--muted)]">
+          <Link href="/parents" className="underline">
+            おうちの方へ（記録・設定）
+          </Link>
+        </footer>
       </body>
     </html>
   );
