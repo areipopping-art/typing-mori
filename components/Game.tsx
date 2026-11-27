@@ -143,7 +143,14 @@ export default function Game({ stage }: { stage: StageId }) {
       </div>
       <Character mood={reaction.mood} message={reaction.message} />
       <div className="w-full max-w-2xl rounded-3xl border-2 border-[var(--card-border)] bg-[var(--card)] px-6 py-10 text-center">
-        <p className="text-[56px] font-extrabold leading-tight">{word.kana}</p>
+        <p className="text-[56px] font-extrabold leading-tight">
+          {word.hint && (
+            <span className="mr-3" aria-hidden>
+              {word.hint}
+            </span>
+          )}
+          {word.kana}
+        </p>
         <p className="mt-4 font-mono text-[48px] font-bold tracking-wider" aria-label={`お手本 ${g.typed}${g.rest}`}>
           <span className="text-[var(--ok)]">{g.typed}</span>
           {g.rest !== "" && (

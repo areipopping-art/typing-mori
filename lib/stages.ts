@@ -8,6 +8,7 @@ export const STAGES: Stage[] = [
   { id: "lv2", key: "2", name: "Lv2 みじかい ことば", desc: "どうぶつ や くだもの", emoji: "🌿" },
   { id: "lv3", key: "3", name: "Lv3 ながい ことば", desc: "4もじ いじょうの ことば", emoji: "🌳" },
   { id: "time", key: "4", name: "タイムアタック", desc: "60びょうで なんもじ うてるかな？", emoji: "⏱" },
+  { id: "english", key: "5", name: "えいたんご", desc: "cat や apple を うってみよう", emoji: "🔤" },
 ];
 
 export const STAGE_IDS = STAGES.map((s) => s.id);
@@ -20,7 +21,7 @@ export function stageOf(id: StageId): Stage {
   return STAGES.find((s) => s.id === id)!;
 }
 
-/** そのステージが あそべるか（前のステージで ★3 を取ると ひらく。タイムアタックは いつでも） */
+/** そのステージが あそべるか（前のステージで ★3 を取ると ひらく。タイムアタック・えいたんごは いつでも） */
 export function isUnlocked(id: StageId, data: Data): boolean {
   if (id === "lv2") return data.stars.lv1 === 3;
   if (id === "lv3") return data.stars.lv2 === 3;

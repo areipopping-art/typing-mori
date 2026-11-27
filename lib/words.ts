@@ -1,12 +1,13 @@
 import { toUnits, type Unit } from "./romaji";
 
-export type Word = { kana: string; units: Unit[] };
+/** 出題する ことば。kana は画面に大きく出す文字（えいたんごでは英単語）、hint は絵文字 */
+export type Word = { kana: string; units: Unit[]; hint?: string };
 
-/** ステージ（timeattack は 60 びょうで何もじ打てるか） */
-export type StageId = "lv1" | "lv2" | "lv3" | "time";
+/** ステージ（time は 60 びょうで何もじ打てるか、english は えいたんご） */
+export type StageId = "lv1" | "lv2" | "lv3" | "time" | "english";
 
 /** ステージごとのことば（ひらがなだけ。ローマ字は romaji.ts で自動で作る） */
-const LISTS: Record<Exclude<StageId, "time">, string[]> = {
+const LISTS: Record<"lv1" | "lv2" | "lv3", string[]> = {
   // Lv1 あいうえお：1〜2文字
   lv1: [
     "あ", "い", "う", "え", "お", "か", "き", "く", "け", "こ",
@@ -27,6 +28,21 @@ const LISTS: Record<Exclude<StageId, "time">, string[]> = {
   ],
 };
 
+/** えいたんご（絵文字の ヒントつき） */
+const ENGLISH: [string, string][] = [
+  ["cat", "🐱"], ["dog", "🐶"], ["fish", "🐟"], ["bird", "🐦"], ["frog", "🐸"],
+  ["bear", "🐻"], ["lion", "🦁"], ["duck", "🦆"], ["cow", "🐮"], ["pig", "🐷"],
+  ["apple", "🍎"], ["banana", "🍌"], ["lemon", "🍋"], ["grape", "🍇"], ["milk", "🥛"],
+  ["cake", "🍰"], ["egg", "🥚"], ["bread", "🍞"], ["sun", "☀️"], ["moon", "🌙"],
+  ["star", "⭐"], ["tree", "🌳"], ["book", "📕"], ["bus", "🚌"], ["car", "🚗"],
+  ["ball", "⚽"], ["pen", "🖊️"], ["cup", "🥤"], ["hat", "🎩"], ["rain", "🌧️"],
+];
+
+/** 英単語は 1文字ずつ そのまま打つ（ゆれなし） */
+function englishWord([word, hint]: [string, string]): Word {
+  return { kana: word, hint, units: [...word].map((ch) => ({ kana: ch, options: [ch] })) };
+}
+
 /** 1かいに出すことばの数 */
 export const WORDS_PER_ROUND = 10;
 
@@ -42,14 +58,14 @@ function shuffle<T>(list: T[]): T[] {
   return a;
 }
 
-function kanaFor(stage: StageId): string[] {
-  return stage === "time" ? [...LISTS.lv2, ...LISTS.lv3] : LISTS[stage];
+function wordsFor(stage: StageId): Word[] {
+  if (stage === "english") return ENGLISH.map(englishWord);
+  const kana = stage === "time" ? [...LISTS.lv2, ...LISTS.lv3] : LISTS[stage];
+  return kana.map((k) => ({ kana: k, units: toUnits(k) }));
 }
 
 /** ステージのことばをランダムに選ぶ（同じことばは続けて出さない） */
 export function pickWords(stage: StageId): Word[] {
   const n = stage === "time" ? Infinity : WORDS_PER_ROUND; // タイムアタックは全部をまぜて出す
-  return shuffle(kanaFor(stage))
-    .slice(0, n)
-    .map((kana) => ({ kana, units: toUnits(kana) }));
+  return shuffle(wordsFor(stage)).slice(0, n);
 }
