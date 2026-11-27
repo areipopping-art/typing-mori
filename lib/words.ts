@@ -1,57 +1,51 @@
-export type Word = { kana: string; romaji: string };
+import { toUnits, type Unit } from "./romaji";
 
-/**
- * 出題することば（子どもが知っている、ひらがなだけのことば）
- * MVP ではローマ字の打ち方が1通りに決まることばだけにしている。
- * し（shi/si）・つ・ち・ふ・じ・ん・きゃ などは v1.0 の「ローマ字のゆれ対応」で追加する。
- */
-export const WORDS: Word[] = [
-  { kana: "ねこ", romaji: "neko" },
-  { kana: "いぬ", romaji: "inu" },
-  { kana: "くま", romaji: "kuma" },
-  { kana: "うさぎ", romaji: "usagi" },
-  { kana: "さる", romaji: "saru" },
-  { kana: "たぬき", romaji: "tanuki" },
-  { kana: "りす", romaji: "risu" },
-  { kana: "ことり", romaji: "kotori" },
-  { kana: "かえる", romaji: "kaeru" },
-  { kana: "めだか", romaji: "medaka" },
-  { kana: "かめ", romaji: "kame" },
-  { kana: "ぶた", romaji: "buta" },
-  { kana: "うま", romaji: "uma" },
-  { kana: "やぎ", romaji: "yagi" },
-  { kana: "あり", romaji: "ari" },
-  { kana: "くり", romaji: "kuri" },
-  { kana: "もも", romaji: "momo" },
-  { kana: "ぶどう", romaji: "budou" },
-  { kana: "すいか", romaji: "suika" },
-  { kana: "かき", romaji: "kaki" },
-  { kana: "もり", romaji: "mori" },
-  { kana: "やま", romaji: "yama" },
-  { kana: "うみ", romaji: "umi" },
-  { kana: "そら", romaji: "sora" },
-  { kana: "くも", romaji: "kumo" },
-  { kana: "あめ", romaji: "ame" },
-  { kana: "はな", romaji: "hana" },
-  { kana: "はっぱ", romaji: "happa" },
-  { kana: "きのこ", romaji: "kinoko" },
-  { kana: "さかな", romaji: "sakana" },
-  { kana: "ひこうき", romaji: "hikouki" },
-  { kana: "おにぎり", romaji: "onigiri" },
-  { kana: "たまご", romaji: "tamago" },
-  { kana: "ありがとう", romaji: "arigatou" },
-  { kana: "おはよう", romaji: "ohayou" },
-];
+export type Word = { kana: string; units: Unit[] };
+
+/** ステージ（timeattack は 60 びょうで何もじ打てるか） */
+export type StageId = "lv1" | "lv2" | "lv3" | "time";
+
+/** ステージごとのことば（ひらがなだけ。ローマ字は romaji.ts で自動で作る） */
+const LISTS: Record<Exclude<StageId, "time">, string[]> = {
+  // Lv1 あいうえお：1〜2文字
+  lv1: [
+    "あ", "い", "う", "え", "お", "か", "き", "く", "け", "こ",
+    "いえ", "うえ", "あお", "かお", "いか", "えき", "あき", "いけ", "おか", "きく",
+  ],
+  // Lv2 みじかいことば：2〜3文字
+  lv2: [
+    "ねこ", "いぬ", "くま", "うさぎ", "さる", "たぬき", "りす", "ことり", "かえる", "めだか",
+    "かめ", "ぶた", "うま", "やぎ", "あり", "くり", "もも", "ぶどう", "すいか", "かき",
+    "もり", "やま", "うみ", "そら", "くも", "あめ", "はな", "はっぱ", "きのこ", "さかな",
+    "たまご", "しか", "きつね", "いちご", "みかん", "ほし", "つき", "ふね", "にじ", "ぱんだ", "きりん",
+  ],
+  // Lv3 ながいことば：4文字以上
+  lv3: [
+    "ひこうき", "おにぎり", "ありがとう", "おはよう", "どんぐり", "ともだち", "しんかんせん",
+    "かたつむり", "ちょうちょ", "でんしゃ", "ぎゅうにゅう", "とうもろこし", "ひまわり",
+    "にんじん", "らいおん", "せんせい", "がっこう", "ぺんぎん", "くわがた", "かぶとむし",
+  ],
+};
 
 /** 1かいに出すことばの数 */
 export const WORDS_PER_ROUND = 10;
 
-/** ことばをランダムに n こ選ぶ（同じことばは出さない） */
-export function pickWords(n = WORDS_PER_ROUND): Word[] {
-  const list = [...WORDS];
-  for (let i = list.length - 1; i > 0; i--) {
+function shuffle<T>(list: T[]): T[] {
+  const a = [...list];
+  for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [list[i], list[j]] = [list[j], list[i]];
+    [a[i], a[j]] = [a[j], a[i]];
   }
-  return list.slice(0, n);
+  return a;
+}
+
+function kanaFor(stage: StageId): string[] {
+  return stage === "time" ? [...LISTS.lv2, ...LISTS.lv3] : LISTS[stage];
+}
+
+/** ステージのことばをランダムに選ぶ（同じことばは続けて出さない） */
+export function pickWords(stage: StageId, n = WORDS_PER_ROUND): Word[] {
+  return shuffle(kanaFor(stage))
+    .slice(0, n)
+    .map((kana) => ({ kana, units: toUnits(kana) }));
 }
