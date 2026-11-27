@@ -48,3 +48,9 @@ body {
   color: var(--foreground);
   font-family: var(--app-font);
 }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
