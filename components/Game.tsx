@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Character, { type Mood } from "@/components/Character";
+import Keyboard from "@/components/Keyboard";
 import { currentGuide, expectedChar, initGame, timeUp, typeChar, type GameState } from "@/lib/game";
 import { keyToChar } from "@/lib/keys";
 import { accuracy, speedPerMinute, stars } from "@/lib/score";
@@ -48,6 +49,8 @@ export default function Game({ stage }: { stage: StageId }) {
     message: "がんばって！",
   });
   const [now, setNow] = useState(0);
+  const [wrongKey, setWrongKey] = useState<string | null>(null);
+  const wrongTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   // タイマー：はじまってから終わるまで 0.1 秒ごとに表示を更新
   const running = game.startedAt !== null && game.finishedAt === null;
@@ -87,6 +90,10 @@ export default function Game({ stage }: { stage: StageId }) {
       gameRef.current = next;
       setGame(next);
       if (result === "wrong") {
+        // 押したキーを 画面キーボードで 一瞬 赤くする
+        setWrongKey(ch);
+        clearTimeout(wrongTimer.current);
+        wrongTimer.current = setTimeout(() => setWrongKey(null), 350);
         const expected = expectedChar(before);
         setReaction({ mood: "surprised", message: `おしい！「${expected}」だよ` });
       } else if (result === "word-done") {
@@ -143,6 +150,7 @@ export default function Game({ stage }: { stage: StageId }) {
           <span className="text-[var(--todo)]">{g.rest.slice(1)}</span>
         </p>
       </div>
+      {!done && <Keyboard next={g.rest[0]} wrong={wrongKey} />}
       {done ? (
         <p className="text-2xl font-bold text-[var(--accent)]">
           {game.timeLimit === null ? "ぜんぶ うてたね！" : "タイムアップ！"}
