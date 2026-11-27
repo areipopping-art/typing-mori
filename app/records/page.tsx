@@ -4,20 +4,22 @@ import Character from "@/components/Character";
 import SpeedChart from "@/components/SpeedChart";
 import { isShown, stagesFor } from "@/lib/stages";
 import { historyOf, useData } from "@/lib/storage";
+import { textsFor } from "@/lib/texts";
 
 /** F-32 きろく（チャレンジ モードの 子ども向け。ひらがなの グラフ） */
 export default function RecordsPage() {
   const data = useData();
+  const t = textsFor(data.course);
   const stages = stagesFor(data.viewCourse).filter((s) => isShown(s.id, data));
   const card = "rounded-3xl border-2 border-[var(--card-border)] bg-[var(--card)] p-6";
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6">
-      <Character mood="happy" message="どれだけ はやく なったかな？" />
-      <h1 className="text-center text-3xl font-extrabold">📈 きろく</h1>
+      <Character mood="happy" message={t.recordsLead} />
+      <h1 className="text-center text-3xl font-extrabold">{t.records}</h1>
 
       <section className={card}>
-        <h2 className="mb-3 text-xl font-bold">🏆 ステージごとの さいこうきろく</h2>
+        <h2 className="mb-3 text-xl font-bold">{t.recordsBest}</h2>
         <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {stages.map((s) => {
             const best = data.best[s.id];
@@ -33,11 +35,11 @@ export default function RecordsPage() {
                 </span>
                 <span className="text-right">
                   {best === undefined ? (
-                    <span className="text-sm text-[var(--muted)]">まだ</span>
+                    <span className="text-sm text-[var(--muted)]">{t.notYet}</span>
                   ) : (
                     <>
                       <b className="text-2xl text-[var(--accent)]">{best}</b>
-                      <span className="text-sm"> もじ/ぷん</span>
+                      <span className="text-sm"> {t.speedUnit}</span>
                     </>
                   )}
                 </span>
@@ -48,8 +50,8 @@ export default function RecordsPage() {
       </section>
 
       <section className={card}>
-        <h2 className="mb-3 text-xl font-bold">📈 はやさの グラフ</h2>
-        <SpeedChart history={historyOf(data)} course={data.viewCourse} kid />
+        <h2 className="mb-3 text-xl font-bold">{t.recordsChart}</h2>
+        <SpeedChart history={historyOf(data)} course={data.viewCourse} kid={data.viewCourse === "kids"} />
       </section>
     </div>
   );

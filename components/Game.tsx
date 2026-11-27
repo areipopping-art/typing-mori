@@ -10,9 +10,9 @@ import { accuracy, speedPerMinute, stars } from "@/lib/score";
 import { playSound } from "@/lib/sound";
 import { isUnlocked, nextStage } from "@/lib/stages";
 import { loadData, recordResult, saveData, saveLast, useData } from "@/lib/storage";
+import { textsFor } from "@/lib/texts";
 import { pickWords, TIME_LIMIT, type StageId } from "@/lib/words";
 
-const PRAISE = ["いいね！", "すごい！", "じょうず！", "その ちょうし！"];
 
 /** 1かい おわったときに、記録を保存して けっかページへ わたす */
 function finishRound(stage: StageId, game: GameState) {
@@ -58,7 +58,7 @@ export default function Game({ stage }: { stage: StageId }) {
   const gameRef = useRef(game);
   const [reaction, setReaction] = useState<{ mood: Mood; message: string }>({
     mood: "normal",
-    message: "がんばって！",
+    message: textsFor(loadData().course).cheer,
   });
   const [now, setNow] = useState(0);
   const [wrongKey, setWrongKey] = useState<string | null>(null);
@@ -77,7 +77,7 @@ export default function Game({ stage }: { stage: StageId }) {
         const ended = timeUp(g);
         gameRef.current = ended;
         setGame(ended);
-        setReaction({ mood: "happy", message: "タイムアップ！" });
+        setReaction({ mood: "happy", message: textsFor(loadData().course).timeUp });
         playSound("clear");
         finishRound(stage, ended);
       }
@@ -107,6 +107,7 @@ export default function Game({ stage }: { stage: StageId }) {
       gameRef.current = next;
       setGame(next);
       if (result === "ignored") return;
+      const tt = textsFor(loadData().course);
       playSound(result === "wrong" ? "ng" : result === "word-done" ? "word" : result === "finished" ? "clear" : "ok");
       if (result === "wrong") {
         // 押したキーを 画面キーボードで 一瞬 赤くする
@@ -114,14 +115,14 @@ export default function Game({ stage }: { stage: StageId }) {
         clearTimeout(wrongTimer.current);
         wrongTimer.current = setTimeout(() => setWrongKey(null), 350);
         const expected = expectedChar(before);
-        setReaction({ mood: "surprised", message: `おしい！「${expected}」だよ` });
+        setReaction({ mood: "surprised", message: tt.miss(expected ?? "?") });
       } else if (result === "word-done") {
-        setReaction({ mood: "happy", message: PRAISE[Math.floor(Math.random() * PRAISE.length)] });
+        setReaction({ mood: "happy", message: tt.praise[Math.floor(Math.random() * tt.praise.length)] });
       } else if (result === "finished") {
-        setReaction({ mood: "happy", message: "やったね！" });
+        setReaction({ mood: "happy", message: tt.finish });
         finishRound(stage, next);
       } else if (result === "correct") {
-        setReaction((r) => (r.mood === "surprised" ? { mood: "normal", message: "そう そう！" } : r));
+        setReaction((r) => (r.mood === "surprised" ? { mood: "normal", message: tt.recover } : r));
       }
     };
     window.addEventListener("keydown", onKey);
@@ -130,6 +131,7 @@ export default function Game({ stage }: { stage: StageId }) {
 
   const data = useData();
   const mode = data.mode ?? "a";
+  const t = textsFor(data.course);
   // はじめて モードは キーボードを いつも出す。チャレンジ モードは ボタンで 出し入れ
   const showKeyboard = mode === "a" || data.showKeyboardB;
 
@@ -151,26 +153,26 @@ export default function Game({ stage }: { stage: StageId }) {
       <div className="flex w-full max-w-2xl flex-wrap justify-between gap-2 text-xl font-bold">
         {mode === "a" ? (
           // はじめて モード：じかんは 出さず、のこりの数だけ
-          <span className="mx-auto">のこり {left} こ</span>
+          <span className="mx-auto">{t.left(left)}</span>
         ) : game.timeLimit === null ? (
           <>
-            <span>⏱ {elapsed.toFixed(1)} びょう</span>
-            <span>のこり {left} こ</span>
+            <span>{t.seconds(elapsed.toFixed(1))}</span>
+            <span>{t.left(left)}</span>
           </>
         ) : (
           <>
-            <span className={timeLeft <= 10 ? "text-[var(--ng)]" : ""}>⏱ のこり {timeLeft} びょう</span>
-            <span>うった ことば {game.done} こ</span>
+            <span className={timeLeft <= 10 ? "text-[var(--ng)]" : ""}>{t.timeLeft(timeLeft)}</span>
+            <span>{t.typedWords(game.done)}</span>
           </>
         )}
       </div>
       {mode === "b" && (
         <div className="flex w-full max-w-2xl justify-center gap-6 text-lg" aria-live="off">
           <span>
-            🚀 いまの はやさ <b className="text-2xl text-[var(--accent)]">{liveSpeed ?? "—"}</b> もじ/ぷん
+            {t.liveSpeed} <b className="text-2xl text-[var(--accent)]">{liveSpeed ?? "—"}</b> {t.liveSpeedUnit}
           </span>
           <span>
-            🎯 せいかくさ <b className="text-2xl text-[var(--accent)]">{liveAcc ?? "—"}</b> %
+            {t.liveAcc} <b className="text-2xl text-[var(--accent)]">{liveAcc ?? "—"}</b> %
           </span>
         </div>
       )}
@@ -223,17 +225,17 @@ export default function Game({ stage }: { stage: StageId }) {
           }}
           className="rounded-full border-2 border-[var(--card-border)] bg-[var(--card)] px-4 py-1 text-sm font-bold"
         >
-          ⌨ キーボードを {showKeyboard ? "かくす" : "みせる"}
+          {t.showKeyboard(showKeyboard)}
         </button>
       )}
       {done ? (
         <p className="text-2xl font-bold text-[var(--accent)]">
-          {game.timeLimit === null ? "ぜんぶ うてたね！" : "タイムアップ！"}
+          {game.timeLimit === null ? t.allDone : t.timeUp}
         </p>
       ) : (
         <p className="text-sm text-[var(--muted)]">
-          {game.startedAt === null && "さいしょの もじを うつと スタート！ ／ "}
-          <kbd className="rounded border border-[var(--card-border)] bg-[var(--card)] px-2 py-0.5">Esc</kbd> で やめる
+          {game.startedAt === null && t.startHint}
+          <kbd className="rounded border border-[var(--card-border)] bg-[var(--card)] px-2 py-0.5">Esc</kbd> {t.escHint}
         </p>
       )}
     </div>

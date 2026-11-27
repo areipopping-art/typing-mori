@@ -6,10 +6,12 @@ import { useEffect } from "react";
 import Character from "@/components/Character";
 import { isShown, isUnlocked, stagesFor } from "@/lib/stages";
 import { useData } from "@/lib/storage";
+import { textsFor } from "@/lib/texts";
 
 export default function StagesPage() {
   const router = useRouter();
   const data = useData();
+  const t = textsFor(data.course);
 
   // 数字キー 1〜4 でも えらべる
   useEffect(() => {
@@ -23,7 +25,7 @@ export default function StagesPage() {
 
   return (
     <div className="flex flex-1 flex-col items-center gap-8">
-      <Character message="どの ステージで あそぶ？" />
+      <Character message={t.chooseStage} />
       <ul className="grid w-full max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2">
         {stagesFor(data.viewCourse).filter((s) => isShown(s.id, data)).map((s) => {
           const open = isUnlocked(s.id, data);
@@ -51,7 +53,7 @@ export default function StagesPage() {
                     ))}
                   </span>
                   <span className="text-sm">
-                    {best === undefined ? "きろく なし" : <>🏆 1ぷんで <b className="text-lg">{best}</b> もじ</>}
+                    {best === undefined ? t.noRecord : <>🏆 {t.perMinute(best)}</>}
                   </span>
                 </p>
               )}

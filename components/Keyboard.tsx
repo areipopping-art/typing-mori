@@ -64,7 +64,7 @@ export default function Keyboard({
             className="rounded-full px-3 py-1"
             style={{ background: `var(--f${nextFinger.id})` }}
           >
-            ☝️ {nextFinger.name}
+            ☝️ {data.course && data.course !== "kids" ? nextFinger.nameGrown : nextFinger.name}
           </span>{" "}
           で「{next}」
         </p>

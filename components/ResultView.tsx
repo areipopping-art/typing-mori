@@ -10,12 +10,8 @@ import { modeOf } from "@/lib/modes";
 import { accuracy, sortMissChars, speedPerMinute, STAR_RULES, stars } from "@/lib/score";
 import { stageOf } from "@/lib/stages";
 import { loadLast } from "@/lib/storage";
+import { textsFor } from "@/lib/texts";
 
-const STAR_MESSAGE = {
-  1: "さいごまで うてたね！ つぎは ゆっくり ていねいに うってみよう",
-  2: "じょうず！ もうすこしで ★3つ だよ",
-  3: "すごい！ もりの タイピング めいじん だ！",
-} as const;
 
 export default function ResultView() {
   const router = useRouter();
@@ -42,6 +38,7 @@ export default function ResultView() {
   const acc = accuracy(result);
   const mode = result.mode ?? "b";
   const course = result.course ?? "kids";
+  const t = textsFor(course);
   const star = result.stars ?? stars(speed, acc, mode, course);
   const rule = STAR_RULES[course][mode];
   const misses = sortMissChars(result.missChars);
@@ -52,16 +49,16 @@ export default function ResultView() {
       {result.newRecord && <Confetti />}
       {result.newRecord && (
         <p className="animate-bounce text-5xl font-extrabold text-[var(--sun)] [text-shadow:0_3px_0_rgb(0_0_0/0.15)]">
-          🎉 しんきろく！ 🎉
+          {t.newRecord}
         </p>
       )}
-      <Character mood="happy" message={STAR_MESSAGE[star]} />
+      <Character mood="happy" message={t.starMessage[star]} />
       <p className="-mt-4 text-sm font-bold text-[var(--muted)]">
         {stageOf(result.stage, course).emoji} {stageOf(result.stage, course).name}
       </p>
       {result.unlocked && (
         <p className="rounded-full bg-[var(--sun)] px-6 py-2 text-xl font-extrabold text-[#3b2a00]">
-          🔓 {stageOf(result.unlocked, course).name} が ひらいたよ！
+          {t.unlocked(stageOf(result.unlocked, course).name)}
         </p>
       )}
 
@@ -74,19 +71,19 @@ export default function ResultView() {
       </p>
 
       <p className="-mt-4 text-xs text-[var(--muted)]">
-        {modeOf(mode).emoji} {modeOf(mode).short}モードの ★3 は せいかくさ {rule.acc3}% いじょう で 1ぷんに {rule.speed3}もじ
-        いじょう
+        {modeOf(mode).emoji} {t.rule(t.modes[mode].short, rule.acc3, rule.speed3)}
       </p>
 
       <div className="grid w-full max-w-2xl grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="rounded-3xl border-2 border-[var(--card-border)] bg-[var(--card)] p-6">
-          <p className="text-[var(--muted)]">はやさ</p>
+          <p className="text-[var(--muted)]">{t.speed}</p>
           <p className="text-2xl font-bold">
-            1ぷんで <span className="text-5xl font-extrabold text-[var(--accent)]">{speed}</span> もじ
+            {t.speedValue[0]} <span className="text-5xl font-extrabold text-[var(--accent)]">{speed}</span>{" "}
+            {t.speedValue[1]}
           </p>
         </div>
         <div className="rounded-3xl border-2 border-[var(--card-border)] bg-[var(--card)] p-6">
-          <p className="text-[var(--muted)]">せいかくさ</p>
+          <p className="text-[var(--muted)]">{t.acc}</p>
           <p className="text-2xl font-bold">
             <span className="text-5xl font-extrabold text-[var(--accent)]">{acc}</span> %
           </p>
@@ -94,24 +91,25 @@ export default function ResultView() {
       </div>
       {!result.newRecord && result.prevBest !== null && (
         <p className="rounded-2xl bg-[var(--card)] px-5 py-2 font-bold">
-          🏆 さいこうきろくは 1ぷんで {result.prevBest} もじ。あと{" "}
-          <span className="text-2xl text-[var(--accent)]">{result.prevBest - speed + 1}</span> もじで しんきろく！
+          {t.gap(result.prevBest, result.prevBest - speed + 1)[0]}
+          <span className="text-2xl text-[var(--accent)]">{t.gap(result.prevBest, result.prevBest - speed + 1)[1]}</span>
+          {t.gap(result.prevBest, result.prevBest - speed + 1)[2]}
         </p>
       )}
       <p className="text-sm text-[var(--muted)]">
-        {Math.round(result.seconds)} びょうで {result.correct} もじ うったよ（まちがい {result.miss} かい）
+        {t.summary(Math.round(result.seconds), result.correct, result.miss)}
       </p>
 
       <div className="w-full max-w-2xl rounded-3xl border-2 border-[var(--card-border)] bg-[var(--card)] p-6">
-        <p className="mb-3 font-bold">まちがえやすかった もじ</p>
+        <p className="mb-3 font-bold">{t.missTitle}</p>
         {misses.length === 0 ? (
-          <p className="text-[var(--accent)] font-bold">まちがい 0 かい！ パーフェクト！</p>
+          <p className="text-[var(--accent)] font-bold">{t.perfect}</p>
         ) : (
           <ul className="flex flex-wrap justify-center gap-3">
             {misses.map(([ch, n]) => (
               <li key={ch} className="rounded-2xl bg-[var(--ng-bg)] px-4 py-2">
                 <span className="font-mono text-3xl font-bold text-[var(--ng)]">{ch}</span>
-                <span className="ml-2 text-sm">{n} かい</span>
+                <span className="ml-2 text-sm">{t.times(n)}</span>
               </li>
             ))}
           </ul>
@@ -121,7 +119,7 @@ export default function ResultView() {
             href="/play?stage=weak"
             className="mt-4 inline-block rounded-full border-2 border-[var(--accent)] px-6 py-2 font-bold text-[var(--accent)]"
           >
-            💪 にがてを とっくん する
+            {t.toWeak}
           </Link>
         )}
       </div>
@@ -131,18 +129,17 @@ export default function ResultView() {
           href={`/play?stage=${result.stage}`}
           className="rounded-full bg-[var(--accent)] px-10 py-4 text-2xl font-extrabold text-[var(--accent-text)] shadow-[0_6px_0_rgb(0_0_0/0.15)] transition active:translate-y-1 active:shadow-none"
         >
-          🔁 もういっかい
+          {t.again}
         </Link>
         <Link
           href="/stages"
           className="rounded-full border-2 border-[var(--card-border)] bg-[var(--card)] px-10 py-4 text-2xl font-bold"
         >
-          🗺 ステージえらび
+          {t.toStages}
         </Link>
       </div>
       <p className="text-sm text-[var(--muted)]">
-        <kbd className="rounded border border-[var(--card-border)] bg-[var(--card)] px-2 py-0.5">エンター</kbd> キーでも
-        もういっかい あそべるよ
+        <kbd className="rounded border border-[var(--card-border)] bg-[var(--card)] px-2 py-0.5">{t.enterKey}</kbd> {t.enterHint}
       </p>
     </div>
   );

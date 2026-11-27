@@ -12,6 +12,7 @@ import { courseOf } from "@/lib/courses";
 import { modeOf } from "@/lib/modes";
 import { stagesFor } from "@/lib/stages";
 import { saveData, useData } from "@/lib/storage";
+import { textsFor } from "@/lib/texts";
 
 // スタンプカードは「きょう」の日付を使うので、サーバーでは描画せずブラウザだけで作る
 const StampCard = dynamic(() => import("@/components/StampCard"), { ssr: false });
@@ -19,6 +20,7 @@ const StampCard = dynamic(() => import("@/components/StampCard"), { ssr: false }
 export default function Home() {
   const router = useRouter();
   const data = useData();
+  const t = textsFor(data.course);
   const records = stagesFor(data.viewCourse).filter((s) => data.best[s.id] !== undefined);
 
   // Space キーでも あそべる
@@ -45,7 +47,7 @@ export default function Home() {
   if (!data.mode) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-8 text-center">
-        <Character mood="happy" message="タイピングのもりへ ようこそ！" />
+        <Character mood="happy" message={t.welcome} />
         <ModeChooser />
       </div>
     );
@@ -53,15 +55,15 @@ export default function Home() {
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-10 text-center">
-      <Character mood="happy" message={`${characterOf(data.character).name}と いっしょに れんしゅう しよう！`} />
+      <Character mood="happy" message={t.greet(characterOf(data.character).name)} />
       <div className="space-y-2">
-        <h1 className="text-4xl font-extrabold">タイピングのもり</h1>
-        <p className="text-[var(--muted)]">ひらがなの ことばを ローマじで うってみよう。1かい 10こ だよ。</p>
+        <h1 className="text-4xl font-extrabold">{courseOf(data.course).appName}</h1>
+        <p className="text-[var(--muted)]">{t.homeLead}</p>
       </div>
       <div className="rounded-3xl border-2 border-[var(--card-border)] bg-[var(--card)] px-8 py-4">
-        <p className="text-sm text-[var(--muted)]">🏆 さいこうきろく（1ぷんで なんもじ）</p>
+        <p className="text-sm text-[var(--muted)]">{t.bestTitle}</p>
         {records.length === 0 ? (
-          <p className="text-lg font-bold">まだ ないよ。あそんで きろくを つくろう！</p>
+          <p className="text-lg font-bold">{t.bestNone}</p>
         ) : (
           <ul className="mt-1 flex flex-wrap justify-center gap-x-6 gap-y-1">
             {records.map((s) => (
@@ -75,7 +77,7 @@ export default function Home() {
       </div>
       <StampCard />
       <div>
-        <p className="mb-2 text-sm text-[var(--muted)]">いっしょに あそぶ なかまを えらんでね</p>
+        <p className="mb-2 text-sm text-[var(--muted)]">{t.chooseCharacter}</p>
         <div className="flex flex-wrap justify-center gap-2" role="radiogroup" aria-label="なかまを えらぶ">
           {CHARACTERS.map((c) => {
             const selected = c.id === data.character;
@@ -104,24 +106,24 @@ export default function Home() {
         onClick={() => saveData({ ...data, mode: null })}
         className="text-sm text-[var(--muted)] underline"
       >
-        いまは {modeOf(data.mode).emoji} {modeOf(data.mode).name}（モードを かえる）
+        {t.nowMode(modeOf(data.mode).emoji, t.modes[data.mode].name)}
       </button>
       <button
         type="button"
         onClick={() => saveData({ ...data, course: null })}
         className="-mt-8 text-sm text-[var(--muted)] underline"
       >
-        {courseOf(data.course).emoji} {courseOf(data.course).name}コース（コースを かえる）
+        {t.nowCourse(courseOf(data.course).emoji, courseOf(data.course).name)}
       </button>
       <Link
         href="/stages"
         className="rounded-full bg-[var(--accent)] px-16 py-5 text-3xl font-extrabold text-[var(--accent-text)] shadow-[0_6px_0_rgb(0_0_0/0.15)] transition active:translate-y-1 active:shadow-none"
       >
-        ▶ あそぶ
+        {t.play}
       </Link>
       <p className="text-sm text-[var(--muted)]">
-        <kbd className="rounded border border-[var(--card-border)] bg-[var(--card)] px-2 py-0.5">スペース</kbd>{" "}
-        キーでも はじめられるよ
+        <kbd className="rounded border border-[var(--card-border)] bg-[var(--card)] px-2 py-0.5">{t.spaceKey}</kbd>{" "}
+        {t.spaceHint}
       </p>
     </div>
   );

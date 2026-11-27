@@ -2,12 +2,13 @@
 
 import { dayKey, lastDays, streak } from "@/lib/days";
 import { useData } from "@/lib/storage";
+import { useTexts } from "@/lib/texts";
 
-const WEEK = ["にち", "げつ", "か", "すい", "もく", "きん", "ど"];
 
 /** まいにちスタンプ（直近 7 日。遊んだ日に 🐾） */
 export default function StampCard() {
   const { playDays } = useData();
+  const t = useTexts();
   const days = lastDays(7);
   const todayKey = dayKey();
   const n = streak(playDays);
@@ -15,10 +16,10 @@ export default function StampCard() {
   return (
     <div className="rounded-3xl border-2 border-[var(--card-border)] bg-[var(--card)] px-6 py-4">
       <p className="mb-2 text-sm text-[var(--muted)]">
-        📅 まいにち スタンプ
+        {t.stamp}
         {n > 0 && (
           <span className="ml-2 font-bold text-[var(--accent)]">
-            れんぞく <span className="text-xl">{n}</span> にち！
+            {t.streak(n)}
           </span>
         )}
       </p>
@@ -30,7 +31,7 @@ export default function StampCard() {
           return (
             <li key={key} className="flex flex-col items-center gap-1">
               <span className={`text-xs ${isToday ? "font-bold text-[var(--accent)]" : "text-[var(--muted)]"}`}>
-                {isToday ? "きょう" : WEEK[d.getDay()]}
+                {isToday ? t.today : t.week[d.getDay()]}
               </span>
               <span
                 className={`flex h-11 w-11 items-center justify-center rounded-full border-2 text-2xl ${
