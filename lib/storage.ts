@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { DEFAULT_CHARACTER } from "./characters";
+import { dayKey } from "./days";
 import { earnedStickers } from "./stickers";
 import type { StageId } from "./words";
 
@@ -54,11 +55,13 @@ export type Data = {
   sound: boolean;                              // 効果音
   history: HistoryItem[];                      // 練習の記録（新しい順、最大 100 件）
   character: string;                           // えらんだ なかま（characters.ts の id）
+  playDays: string[];                          // 遊んだ日（"2026-11-27"、古い順、最大 60 日）
 };
 
 const DATA_KEY = "typing-mori";
 const CHANGE_EVENT = "typing-mori-change";
 const HISTORY_MAX = 100;
+const PLAY_DAYS_MAX = 60;
 
 export const EMPTY_DATA: Data = {
   best: {},
@@ -67,6 +70,7 @@ export const EMPTY_DATA: Data = {
   sound: true,
   history: [],
   character: DEFAULT_CHARACTER,
+  playDays: [],
 };
 
 let cache: { raw: string | null; data: Data } | null = null;
@@ -145,6 +149,9 @@ export function recordResult(item: Omit<HistoryItem, "at">): {
     best: newRecord ? { ...before.best, [item.stage]: item.speed } : before.best,
     stars: { ...before.stars, [item.stage]: Math.max(before.stars[item.stage] ?? 0, item.stars) as 1 | 2 | 3 },
     history: [{ ...item, at: new Date().toISOString() }, ...before.history].slice(0, HISTORY_MAX),
+    playDays: before.playDays.includes(dayKey())
+      ? before.playDays
+      : [...before.playDays, dayKey()].slice(-PLAY_DAYS_MAX),
   };
   saveData(data);
   return { newRecord, prevBest, newStickers, data };

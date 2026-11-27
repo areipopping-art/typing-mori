@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Character from "@/components/Character";
+import StampCard from "@/components/StampCard";
 import { CHARACTERS, characterOf } from "@/lib/characters";
 import { STAGES } from "@/lib/stages";
 import { saveData, useData } from "@/lib/storage";
@@ -47,6 +48,7 @@ export default function Home() {
           </ul>
         )}
       </div>
+      <StampCard />
       <div>
         <p className="mb-2 text-sm text-[var(--muted)]">いっしょに あそぶ なかまを えらんでね</p>
         <div className="flex flex-wrap justify-center gap-2" role="radiogroup" aria-label="なかまを えらぶ">
