@@ -25,7 +25,7 @@ export default function StickersPage() {
             <li
               key={s.id}
               className={`flex flex-col items-center rounded-3xl border-2 p-4 text-center ${
-                has ? "border-[var(--sun)] bg-[var(--card)]" : "border-dashed border-[var(--card-border)]"
+                has ? "border-[var(--sun)] bg-[var(--card)]" : "border-dashed border-[var(--card-border)] bg-[var(--card)]"
               }`}
             >
               {/* まだのものは シルエット */}

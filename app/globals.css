@@ -79,3 +79,76 @@ body {
     --f5: #22413f; --f6: #283a55; --f7: #382f55; --f8: #4a2c47;
   }
 }
+
+/*
+ * コースごとの色（<html data-course="..."> で切りかえる）
+ * - student（教室）：黒板の緑 × チョークの白 × 木の茶
+ * - adult（オフィス）：ネイビー × グレー
+ * 背景の絵の色は --scene-* で持つ
+ */
+:root {
+  --scene-sky: #dff2ff; --scene-a: #bfe3a5; --scene-b: #8cc46f; --scene-c: #6f9e55; --scene-d: #a3784f;
+  --scene-opacity: 0.55;
+}
+:root[data-course="student"] {
+  --background: #f6f1e6;
+  --foreground: #2b2a26;
+  --muted: #6f6a5c;
+  --card: #fffdf8;
+  --card-border: #e4d8bf;
+  --accent: #2e6b4f;
+  --accent-text: #ffffff;
+  --ok: #2e7d4f;
+  --sun: #e0a526;
+  --todo: #a39d8c;
+  --scene-sky: #f1e9d6; --scene-a: #3b6b52; --scene-b: #8b5e34; --scene-c: #d2ab7a; --scene-d: #b88a58;
+  --scene-opacity: 0.32;
+}
+:root[data-course="adult"] {
+  --background: #eef2f7;
+  --foreground: #1d2733;
+  --muted: #5f6b7a;
+  --card: #ffffff;
+  --card-border: #d5dde8;
+  --accent: #1f4e8c;
+  --accent-text: #ffffff;
+  --ok: #2b7a4b;
+  --sun: #d99a1e;
+  --todo: #9aa5b3;
+  --scene-sky: #cfe0f2; --scene-a: #8fa6c2; --scene-b: #5c6f88; --scene-c: #b9c3cf; --scene-d: #4f8a5b;
+  --scene-opacity: 0.32;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --scene-sky: #1d2a1a; --scene-a: #2c4424; --scene-b: #35532a; --scene-c: #3f6331; --scene-d: #4a3a28;
+    --scene-opacity: 0.6;
+  }
+  :root[data-course="student"] {
+    --background: #1a201c;
+    --foreground: #ece8dd;
+    --muted: #aaa493;
+    --card: #242c26;
+    --card-border: #3a463c;
+    --accent: #7cc49b;
+    --accent-text: #10201a;
+    --ok: #86d6a4;
+    --sun: #f0c45a;
+    --todo: #7d8a7f;
+    --scene-sky: #1f2722; --scene-a: #2f4a3b; --scene-b: #4d3a26; --scene-c: #3b3328; --scene-d: #5a4630;
+    --scene-opacity: 0.5;
+  }
+  :root[data-course="adult"] {
+    --background: #121821;
+    --foreground: #e4eaf2;
+    --muted: #9aa7b8;
+    --card: #1b2430;
+    --card-border: #2c3a4c;
+    --accent: #6fa3e8;
+    --accent-text: #0d1a2c;
+    --ok: #7fd3a0;
+    --sun: #f0c45a;
+    --todo: #6f7c8d;
+    --scene-sky: #17222f; --scene-a: #24344a; --scene-b: #33465f; --scene-c: #222d3a; --scene-d: #2f5a3a;
+    --scene-opacity: 0.5;
+  }
+}

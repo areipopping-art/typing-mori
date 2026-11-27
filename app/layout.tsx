@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { M_PLUS_Rounded_1c } from "next/font/google";
 import Link from "next/link";
+import AppTitle from "@/components/AppTitle";
+import Background from "@/components/Background";
 import HeaderNav from "@/components/HeaderNav";
 import "./globals.css";
 
@@ -12,6 +14,9 @@ const rounded = M_PLUS_Rounded_1c({
   variable: "--font-m-plus-rounded",
 });
 
+/** 保存データの コースを <html data-course> に つける（データは端末の外に出ない） */
+const COURSE_SCRIPT = `try{var d=JSON.parse(localStorage.getItem("typing-mori")||"{}");document.documentElement.dataset.course=d.course||"kids"}catch(e){}`;
+
 export const metadata: Metadata = {
   title: "タイピングのもり",
   description: "子どもが楽しく遊びながらローマ字入力を練習できるタイピングゲーム",
@@ -19,13 +24,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="ja" className={`${rounded.variable} h-full antialiased`}>
+    <html lang="ja" className={`${rounded.variable} h-full antialiased`} suppressHydrationWarning>
+      <head>
+        {/* 読み込み直後に 子どもコースの色が 一瞬 見えないよう、描画前に コースを つける */}
+        <script dangerouslySetInnerHTML={{ __html: COURSE_SCRIPT }} />
+      </head>
       <body className="min-h-full flex flex-col">
-        <header className="border-b border-[var(--card-border)] bg-[var(--card)]">
+        <Background />
+        <header className="border-b border-[var(--card-border)] bg-[var(--card)]/90 backdrop-blur">
           <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 py-3">
-            <Link href="/" className="text-xl font-extrabold text-[var(--accent)]">
-              🌳 タイピングのもり
-            </Link>
+            <AppTitle />
             <HeaderNav />
           </div>
         </header>

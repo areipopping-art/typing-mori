@@ -68,7 +68,7 @@ export default function StagesPage() {
                   {body}
                 </Link>
               ) : (
-                <div className={`${base} border-dashed border-[var(--card-border)] opacity-60`} aria-disabled>
+                <div className={`${base} border-dashed border-[var(--card-border)] bg-[var(--card)] text-[var(--muted)]`} aria-disabled>
                   {body}
                 </div>
               )}
