@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Character from "@/components/Character";
+import Confetti from "@/components/Confetti";
 import { accuracy, sortMissChars, speedPerMinute, stars } from "@/lib/score";
 import { loadLast } from "@/lib/storage";
 
@@ -40,6 +41,12 @@ export default function ResultView() {
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-8 text-center">
+      {result.newRecord && <Confetti />}
+      {result.newRecord && (
+        <p className="animate-bounce text-5xl font-extrabold text-[var(--sun)] [text-shadow:0_3px_0_rgb(0_0_0/0.15)]">
+          🎉 しんきろく！ 🎉
+        </p>
+      )}
       <Character mood="happy" message={STAR_MESSAGE[star]} />
 
       <p className="text-6xl tracking-widest" aria-label={`ほし ${star} こ`}>

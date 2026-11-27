@@ -54,3 +54,16 @@ body {
   25% { transform: translateX(-6px); }
   75% { transform: translateX(6px); }
 }
+
+@keyframes confetti-fall {
+  to { transform: translateY(110vh) rotate(720deg); opacity: 0.6; }
+}
+.confetti {
+  animation-name: confetti-fall;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+/* 動きを減らす設定の人には紙ふぶきを出さない */
+@media (prefers-reduced-motion: reduce) {
+  .confetti { display: none; }
+}

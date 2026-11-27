@@ -5,7 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import Character, { type Mood } from "@/components/Character";
 import { initGame, typeChar } from "@/lib/game";
 import { keyToChar } from "@/lib/keys";
-import { saveLast } from "@/lib/storage";
+import { speedPerMinute } from "@/lib/score";
+import { saveLast, updateBest } from "@/lib/storage";
 import { pickWords } from "@/lib/words";
 
 const PRAISE = ["いいね！", "すごい！", "じょうず！", "その ちょうし！"];
@@ -31,11 +32,13 @@ export default function Game() {
   // ぜんぶ打ち終えたら結果を保存して、けっかページへ
   useEffect(() => {
     if (game.finishedAt === null || game.startedAt === null) return;
+    const seconds = (game.finishedAt - game.startedAt) / 1000;
     saveLast({
       correct: game.correct,
       miss: game.miss,
-      seconds: (game.finishedAt - game.startedAt) / 1000,
+      seconds,
       missChars: game.missChars,
+      newRecord: updateBest(speedPerMinute({ correct: game.correct, seconds })),
     });
     const id = setTimeout(() => router.push("/result"), 600); // 「ぜんぶ うてたね！」を少し見せる
     return () => clearTimeout(id);
