@@ -18,6 +18,8 @@ export type LastResult = {
   prevBest: number | null;           // この回の前の さいこうきろく
   unlocked: StageId | null;          // この回で ひらいたステージ
   newStickers: string[];             // この回で もらった シール
+  mode: Mode;                        // あそんだ ときの モード
+  stars: 1 | 2 | 3;                  // その モードの 基準で ついた ★
 };
 
 const LAST_KEY = "typing-mori-last";
@@ -47,6 +49,7 @@ export type HistoryItem = {
   speed: number;
   acc: number;
   stars: 1 | 2 | 3;
+  mode?: Mode;  // あそんだ ときの モード（モードを入れる前の記録には ない）
 };
 
 export type Data = {

@@ -33,7 +33,13 @@ export function stageOf(id: StageId): Stage {
 }
 
 /** そのステージが あそべるか（前のステージで ★3 を取ると ひらく。タイムアタック・えいたんごは いつでも） */
+/** そのモードで ステージえらびに 出すか（はじめて モードでは タイムアタックを 出さない） */
+export function isShown(id: StageId, data: Data): boolean {
+  return !(id === "time" && data.mode === "a");
+}
+
 export function isUnlocked(id: StageId, data: Data): boolean {
+  if (!isShown(id, data)) return false;
   if (id === "lv2") return data.stars.lv1 === 3;
   if (id === "lv3") return data.stars.lv2 === 3;
   if (id === "weak") return Object.keys(data.missStats).length > 0;

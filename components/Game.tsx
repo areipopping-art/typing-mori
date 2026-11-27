@@ -21,9 +21,12 @@ function finishRound(stage: StageId, game: GameState) {
   const speed = speedPerMinute({ correct: game.correct, seconds });
   const acc = accuracy(game);
   const next = nextStage(stage);
-  const nextWasOpen = next !== null && isUnlocked(next, loadData());
+  const before = loadData();
+  const mode = before.mode ?? "a";
+  const star = stars(speed, acc, mode);
+  const nextWasOpen = next !== null && isUnlocked(next, before);
   const { newRecord, prevBest, newStickers, data } = recordResult(
-    { stage, speed, acc, stars: stars(speed, acc) },
+    { stage, speed, acc, stars: star, mode },
     game.missChars,
   );
   saveLast({
@@ -36,6 +39,8 @@ function finishRound(stage: StageId, game: GameState) {
     prevBest,
     unlocked: next !== null && !nextWasOpen && isUnlocked(next, data) ? next : null,
     newStickers,
+    mode,
+    stars: star,
   });
 }
 

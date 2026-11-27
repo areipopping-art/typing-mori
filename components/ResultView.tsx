@@ -6,7 +6,8 @@ import { useEffect, useState } from "react";
 import Character from "@/components/Character";
 import Confetti from "@/components/Confetti";
 import StickerModal from "@/components/StickerModal";
-import { accuracy, sortMissChars, speedPerMinute, stars } from "@/lib/score";
+import { modeOf } from "@/lib/modes";
+import { accuracy, sortMissChars, speedPerMinute, STAR_RULES, stars } from "@/lib/score";
 import { stageOf } from "@/lib/stages";
 import { loadLast } from "@/lib/storage";
 
@@ -39,7 +40,9 @@ export default function ResultView() {
 
   const speed = speedPerMinute(result);
   const acc = accuracy(result);
-  const star = stars(speed, acc);
+  const mode = result.mode ?? "b";
+  const star = result.stars ?? stars(speed, acc, mode);
+  const rule = STAR_RULES[mode];
   const misses = sortMissChars(result.missChars);
 
   return (
@@ -67,6 +70,11 @@ export default function ResultView() {
             ★
           </span>
         ))}
+      </p>
+
+      <p className="-mt-4 text-xs text-[var(--muted)]">
+        {modeOf(mode).emoji} {modeOf(mode).short}モードの ★3 は せいかくさ {rule.acc3}% いじょう で 1ぷんに {rule.speed3}もじ
+        いじょう
       </p>
 
       <div className="grid w-full max-w-2xl grid-cols-1 gap-4 sm:grid-cols-2">

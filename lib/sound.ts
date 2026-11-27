@@ -41,7 +41,9 @@ export function playSound(kind: SoundKind) {
       tone(ac, 1046, 0, 0.06, "triangle", 0.08);
       break;
     case "ng":
-      tone(ac, 150, 0, 0.18, "square", 0.06);
+      // はじめて モードは やわらかい「ポン」、チャレンジ モードは「ブブッ」
+      if (loadData().mode === "a") tone(ac, 392, 0, 0.15, "sine", 0.08);
+      else tone(ac, 150, 0, 0.18, "square", 0.06);
       break;
     case "word":
       tone(ac, 784, 0, 0.08, "triangle", 0.1);

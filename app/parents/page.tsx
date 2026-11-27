@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import SpeedChart from "@/components/SpeedChart";
+import { modeOf } from "@/lib/modes";
 import { stageOf } from "@/lib/stages";
 import { STICKERS } from "@/lib/stickers";
 import { clearData, saveData, useData } from "@/lib/storage";
@@ -68,6 +69,7 @@ export default function ParentsPage() {
                 <tr>
                   <th className="py-2 pr-3 font-normal">日時</th>
                   <th className="py-2 pr-3 font-normal">ステージ</th>
+                  <th className="py-2 pr-3 font-normal">モード</th>
                   <th className="py-2 pr-3 text-right font-normal">速さ（文字/分）</th>
                   <th className="py-2 pr-3 text-right font-normal">正確さ</th>
                   <th className="py-2 font-normal">評価</th>
@@ -78,6 +80,7 @@ export default function ParentsPage() {
                   <tr key={h.at} className="border-t border-[var(--card-border)]">
                     <td className="py-2 pr-3 whitespace-nowrap">{dateFormat.format(new Date(h.at))}</td>
                     <td className="py-2 pr-3">{stageOf(h.stage).name}</td>
+                    <td className="py-2 pr-3 whitespace-nowrap">{h.mode ? modeOf(h.mode).short : "—"}</td>
                     <td className="py-2 pr-3 text-right font-bold">{h.speed}</td>
                     <td className="py-2 pr-3 text-right">{h.acc}%</td>
                     <td className="py-2 text-[var(--sun)]">{"★".repeat(h.stars)}</td>
